@@ -38,6 +38,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Lunchbar;
 import android.support.v13.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -57,9 +59,6 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.gordonwong.materialsheetfab.MaterialSheetFab;
-import com.gordonwong.materialsheetfab.MaterialSheetFabEventListener;
-
 import org.omnirom.substratum.R;
 
 import java.io.File;
@@ -73,7 +72,6 @@ import projekt.substratum.common.commands.FileOperations;
 import projekt.substratum.common.platform.ThemeManager;
 import projekt.substratum.util.files.Root;
 import projekt.substratum.util.injectors.AOPTCheck;
-import projekt.substratum.util.views.FloatingActionMenu;
 
 import static android.content.om.OverlayInfo.STATE_APPROVED_DISABLED;
 import static android.content.om.OverlayInfo.STATE_APPROVED_ENABLED;
@@ -95,12 +93,100 @@ public class InformationActivity extends SubstratumActivity {
     private byte[] byteArray;
     private SharedPreferences prefs;
     private ProgressDialog mProgressDialog;
-    private MaterialSheetFab materialSheetFab;
     private int tabPosition;
     private LocalBroadcastManager localBroadcastManager;
     private BroadcastReceiver refreshReceiver;
     private boolean mStoragePerms;
-    private FloatingActionMenu floatingActionButton;
+    private FloatingActionButton floatingActionButton;
+
+    private class FabDialog extends AlertDialog implements View.OnClickListener {
+        private Switch enable_swap;
+        private TextView compile_enable_selected;
+        private TextView compile_update_selected;
+        private TextView disable_selected;
+        private TextView enable_selected;
+
+        protected FabDialog(@NonNull Context context) {
+            super(context);
+        }
+
+        protected void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            setContentView(R.layout.sheet_dialog);
+
+            boolean checkOMS = References.checkOMS(InformationActivity.this);
+            enable_swap = findViewById(R.id.enable_swap);
+            if (!checkOMS) {
+                enable_swap.setText(getString(R.string.fab_menu_swap_toggle_legacy));
+            }
+            enable_swap.setOnClickListener(this);
+
+            compile_enable_selected = findViewById(R.id.compile_enable_selected);
+            if (!checkOMS) {
+                compile_enable_selected.setVisibility(View.GONE);
+            }
+            compile_enable_selected.setOnClickListener(this);
+
+            compile_update_selected = findViewById(R.id.compile_update_selected);
+            if (!checkOMS) {
+                compile_update_selected.setText(getString(R.string.fab_menu_compile_install));
+            }
+            compile_update_selected.setOnClickListener(this);
+
+            disable_selected = findViewById(R.id.disable_selected);
+            if (!checkOMS) {
+                disable_selected.setText(getString(R.string.fab_menu_uninstall));
+            }
+            disable_selected.setOnClickListener(this);
+
+            LinearLayout enable_zone = findViewById(R.id.enable);
+            if (!checkOMS) {
+                enable_zone.setVisibility(View.GONE);
+            }
+            enable_selected = findViewById(R.id.enable_selected);
+            enable_selected.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            Intent intent = new Intent("Overlays.START_JOB");
+
+            if (view == enable_swap) {
+                boolean enabled = prefs.getBoolean("enable_swapping_overlays", true);
+                intent.putExtra("command", "MixAndMatchMode");
+                intent.putExtra("newValue", enabled);
+                localBroadcastManager.sendBroadcast(intent);
+                enable_swap.setChecked(enabled);
+
+                enable_swap.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                    prefs.edit().putBoolean("enable_swapping_overlays", isChecked).apply();
+                    intent.putExtra("command", "MixAndMatchMode");
+                    intent.putExtra("newValue", isChecked);
+                    localBroadcastManager.sendBroadcast(intent);
+                });
+            }
+            if (view == compile_enable_selected) {
+                dismiss();
+                intent.putExtra("command", "CompileEnable");
+                localBroadcastManager.sendBroadcast(intent);
+            }
+            if (view == compile_update_selected) {
+                dismiss();
+                intent.putExtra("command", "CompileUpdate");
+                localBroadcastManager.sendBroadcast(intent);
+            }
+            if (view == disable_selected) {
+                dismiss();
+                intent.putExtra("command", "Disable");
+                localBroadcastManager.sendBroadcast(intent);
+            }
+            if (view == enable_selected) {
+                dismiss();
+                intent.putExtra("command", "Enable");
+                localBroadcastManager.sendBroadcast(intent);
+            }
+        }
+    }
 
     private static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
@@ -220,22 +306,7 @@ public class InformationActivity extends SubstratumActivity {
         }
         if (toolbar != null) toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
-        View sheetView = findViewById(R.id.fab_sheet);
-        View overlay = findViewById(R.id.overlay);
-        int sheetColor = getApplicationContext().getColor(R.color.fab_menu_background_card);
-        int fabColor = getApplicationContext().getColor(R.color.fab_background_color);
-
         floatingActionButton = findViewById(R.id.apply_fab);
-
-        // Create material sheet FAB
-        if (sheetView != null && overlay != null) {
-            materialSheetFab = new MaterialSheetFab<>(
-                    floatingActionButton,
-                    sheetView,
-                    overlay,
-                    sheetColor,
-                    fabColor);
-        }
 
         Drawable upArrow = getDrawable(R.drawable.information_activity_back_light);
         if (upArrow != null)
@@ -244,6 +315,8 @@ public class InformationActivity extends SubstratumActivity {
         getSupportActionBar().setHomeAsUpIndicator(upArrow);
         setOverflowButtonColor(this, false);
 
+        final FabDialog sheetDialog = new FabDialog(this);
+
         LocalBroadcastManager localBroadcastManager =
                 LocalBroadcastManager.getInstance(getApplicationContext());
         floatingActionButton.setOnClickListener(v -> {
@@ -251,105 +324,12 @@ public class InformationActivity extends SubstratumActivity {
                 boolean isLunchbarOpen = closeAllLunchBars();
                 final Handler handler = new Handler();
                 handler.postDelayed(() -> {
-                    materialSheetFab.showSheet();
+                    sheetDialog.show();
                 }, isLunchbarOpen ? LUNCHBAR_DISMISS_FAB_CLICK_DELAY : 0);
             } catch (NullPointerException npe) {
                 // Suppress warning
             }
         });
-
-        Intent intent = new Intent("Overlays.START_JOB");
-        Switch enable_swap = findViewById(R.id.enable_swap);
-        if (!References.checkOMS(this)) {
-            enable_swap.setText(getString(R.string.fab_menu_swap_toggle_legacy));
-        }
-        if (enable_swap != null) {
-            boolean enabled = prefs.getBoolean("enable_swapping_overlays", true);
-            intent.putExtra("command", "MixAndMatchMode");
-            intent.putExtra("newValue", enabled);
-            localBroadcastManager.sendBroadcast(intent);
-            enable_swap.setChecked(enabled);
-
-            enable_swap.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                prefs.edit().putBoolean("enable_swapping_overlays", isChecked).apply();
-                intent.putExtra("command", "MixAndMatchMode");
-                intent.putExtra("newValue", isChecked);
-                localBroadcastManager.sendBroadcast(intent);
-            });
-        }
-
-        final TextView compile_enable_selected = findViewById(R.id.compile_enable_selected);
-        if (!References.checkOMS(this)) compile_enable_selected.setVisibility(View.GONE);
-        if (compile_enable_selected != null) {
-            compile_enable_selected.setOnClickListener(v -> {
-                materialSheetFab.setEventListener(new MaterialSheetFabEventListener() {
-                    @Override
-                    public void onSheetHidden() {
-                        super.onSheetHidden();
-                        intent.putExtra("command", "CompileEnable");
-                        localBroadcastManager.sendBroadcast(intent);
-                        materialSheetFab.setEventListener(null);
-                    }
-                });
-                materialSheetFab.hideSheet();
-            });
-        }
-
-        TextView compile_update_selected = findViewById(R.id.compile_update_selected);
-        if (!References.checkOMS(this)) {
-            compile_update_selected.setText(getString(R.string.fab_menu_compile_install));
-        }
-        if (compile_update_selected != null) {
-            compile_update_selected.setOnClickListener(v -> {
-                materialSheetFab.setEventListener(new MaterialSheetFabEventListener() {
-                    @Override
-                    public void onSheetHidden() {
-                        super.onSheetHidden();
-                        intent.putExtra("command", "CompileUpdate");
-                        localBroadcastManager.sendBroadcast(intent);
-                        materialSheetFab.setEventListener(null);
-                    }
-                });
-                materialSheetFab.hideSheet();
-            });
-        }
-
-        TextView disable_selected = findViewById(R.id.disable_selected);
-        if (!References.checkOMS(this)) {
-            disable_selected.setText(getString(R.string.fab_menu_uninstall));
-        }
-        if (disable_selected != null) {
-            disable_selected.setOnClickListener(v -> {
-                materialSheetFab.setEventListener(new MaterialSheetFabEventListener() {
-                    @Override
-                    public void onSheetHidden() {
-                        super.onSheetHidden();
-                        intent.putExtra("command", "Disable");
-                        localBroadcastManager.sendBroadcast(intent);
-                        materialSheetFab.setEventListener(null);
-                    }
-                });
-                materialSheetFab.hideSheet();
-            });
-        }
-
-        LinearLayout enable_zone = findViewById(R.id.enable);
-        if (!References.checkOMS(this)) enable_zone.setVisibility(View.GONE);
-        TextView enable_selected = findViewById(R.id.enable_selected);
-        if (enable_selected != null) {
-            enable_selected.setOnClickListener(v -> {
-                materialSheetFab.setEventListener(new MaterialSheetFabEventListener() {
-                    @Override
-                    public void onSheetHidden() {
-                        super.onSheetHidden();
-                        intent.putExtra("command", "Enable");
-                        localBroadcastManager.sendBroadcast(intent);
-                        materialSheetFab.setEventListener(null);
-                    }
-                });
-                materialSheetFab.hideSheet();
-            });
-        }
 
         requestStoragePermissions();
         new AOPTCheck().injectAOPT(this, false);
@@ -592,13 +572,9 @@ public class InformationActivity extends SubstratumActivity {
 
     @Override
     public void onBackPressed() {
-        if (materialSheetFab.isSheetVisible()) {
-            materialSheetFab.hideSheet();
-        } else {
-            if (uninstalled)
-                References.sendRefreshMessage(getApplicationContext());
-            finish();
-        }
+        if (uninstalled)
+            References.sendRefreshMessage(getApplicationContext());
+        finish();
     }
 
     @Override
@@ -693,6 +669,7 @@ public class InformationActivity extends SubstratumActivity {
             }
         }
     }
+
     private void requestStoragePermissions() {
         int permissionCheck = ContextCompat.checkSelfPermission(
                 getApplicationContext(),
