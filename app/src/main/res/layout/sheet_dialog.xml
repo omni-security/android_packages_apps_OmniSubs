@@ -23,22 +23,19 @@
 
     <TextView
         android:id="@+id/compile_enable_selected"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        style="@style/TextAppearance.MaterialSheetFab.Sheet.Item"
         android:drawableStart="@drawable/fab_menu_compile_enable"
         android:text="@string/fab_menu_compile_enable"/>
 
     <TextView
         android:id="@+id/compile_update_selected"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        style="@style/TextAppearance.MaterialSheetFab.Sheet.Item"
         android:drawableStart="@drawable/fab_menu_compile_update"
         android:text="@string/fab_menu_compile_update"/>
 
     <TextView
         android:id="@+id/disable_selected"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        style="@style/TextAppearance.MaterialSheetFab.Sheet.Item"
         android:drawableStart="@drawable/fab_menu_disable"
         android:text="@string/fab_menu_disable"/>
 
@@ -49,8 +46,7 @@
 
         <TextView
             android:id="@+id/enable_selected"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            style="@style/TextAppearance.MaterialSheetFab.Sheet.Item"
             android:drawableStart="@drawable/fab_menu_enable"
             android:text="@string/fab_menu_enable"/>
     </LinearLayout>
