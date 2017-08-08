@@ -93,9 +93,6 @@ import javax.security.auth.x500.X500Principal;
 import projekt.substratum.activities.launch.ThemeLaunchActivity;
 import projekt.substratum.common.commands.ElevatedCommands;
 import projekt.substratum.common.platform.ThemeInterfacerService;
-import projekt.substratum.services.packages.OverlayFound;
-import projekt.substratum.services.packages.OverlayUpdater;
-import projekt.substratum.services.packages.PackageModificationDetector;
 import projekt.substratum.services.system.InterfacerAuthorizationReceiver;
 import projekt.substratum.util.compilers.CacheCreator;
 import projekt.substratum.util.files.IOUtils;
@@ -339,19 +336,6 @@ public class References {
 
     public static void registerBroadcastReceivers(Context context) {
         try {
-            IntentFilter intentPackageAdded = new IntentFilter(PACKAGE_ADDED);
-            intentPackageAdded.addDataScheme("package");
-            IntentFilter intentPackageFullyRemoved = new IntentFilter(PACKAGE_FULLY_REMOVED);
-            intentPackageFullyRemoved.addDataScheme("package");
-            context.getApplicationContext().registerReceiver(
-                    new OverlayFound(), intentPackageAdded);
-            context.getApplicationContext().registerReceiver(
-                    new OverlayUpdater(), intentPackageAdded);
-            context.getApplicationContext().registerReceiver(
-                    new PackageModificationDetector(), intentPackageAdded);
-            context.getApplicationContext().registerReceiver(
-                    new PackageModificationDetector(), intentPackageFullyRemoved);
-
             IntentFilter interfacerAuthorize = new IntentFilter(
                     INTERFACER_PACKAGE + ".CALLER_AUTHORIZED");
             context.getApplicationContext().registerReceiver(

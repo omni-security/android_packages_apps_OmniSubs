@@ -33,14 +33,14 @@ import projekt.substratum.common.References;
 import static projekt.substratum.common.References.INTERFACER_BINDED;
 import static projekt.substratum.common.References.INTERFACER_PACKAGE;
 
-public class BinderService extends Service implements ServiceConnection {
+public class OmniBinderService extends Service implements ServiceConnection {
 
-    private static final String TAG = "BinderService";
-    private static BinderService binderService;
+    private static final String TAG = "OmniBinderService";
+    private static OmniBinderService binderService;
     private IInterfacerInterface interfacerInterface;
     private boolean mBound;
 
-    public static BinderService getInstance() {
+    public static OmniBinderService getInstance() {
         return binderService;
     }
 

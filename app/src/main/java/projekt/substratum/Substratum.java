@@ -25,11 +25,11 @@ import android.content.Intent;
 import android.util.Log;
 
 import projekt.substratum.common.References;
-import projekt.substratum.services.binder.BinderService;
+import projekt.substratum.services.binder.OmniBinderService;
 
 public class Substratum extends Application {
 
-    private static final String BINDER_TAG = "BinderService";
+    private static final String BINDER_TAG = "OmniBinderService";
     private static Substratum substratum;
 
     public static Substratum getInstance() {
@@ -46,12 +46,22 @@ public class Substratum extends Application {
 
     public void startBinderService() {
         if (References.isBinderInterfacer(getApplicationContext())) {
-            if (checkServiceActivation(BinderService.class)) {
+            if (checkServiceActivation(OmniBinderService.class)) {
                 Log.d(BINDER_TAG, "This session will utilize the pre-connected Binder service!");
             } else {
                 Log.d(BINDER_TAG, "Substratum is now connecting to the Binder service...");
                 startService(new Intent(getApplicationContext(),
-                        BinderService.class));
+                        OmniBinderService.class));
+            }
+        }
+    }
+
+    public void stopBinderService() {
+        if (References.isBinderInterfacer(getApplicationContext())) {
+            if (checkServiceActivation(OmniBinderService.class)) {
+                Log.d(BINDER_TAG, "Stop Binder Binder service!");
+                stopService(new Intent(getApplicationContext(),
+                        OmniBinderService.class));
             }
         }
     }
