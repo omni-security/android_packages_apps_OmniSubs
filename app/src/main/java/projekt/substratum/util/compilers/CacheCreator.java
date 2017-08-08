@@ -40,10 +40,9 @@ import java.io.PrintWriter;
 
 import javax.crypto.Cipher;
 
-import projekt.substratum.R;
+import org.omnirom.substratum.R;
 import projekt.substratum.common.References;
 import projekt.substratum.common.commands.FileOperations;
-import projekt.substratum.services.notification.NotificationUpgradeReceiver;
 
 import static projekt.substratum.common.References.SUBSTRATUM_BUILDER_CACHE;
 
@@ -139,12 +138,6 @@ public class CacheCreator {
             // Initialize Notification
             int notification_priority = Notification.PRIORITY_MAX;
 
-            // Create an Intent for the BroadcastReceiver
-            Intent buttonIntent = new Intent(mContext, NotificationUpgradeReceiver.class);
-
-            // Create the PendingIntent
-            PendingIntent btPendingIntent = PendingIntent.getBroadcast(
-                    mContext, 0, buttonIntent, 0);
             PendingIntent resultPendingIntent = PendingIntent.getActivity(
                     mContext, 0, new Intent(), 0);
 
@@ -155,8 +148,6 @@ public class CacheCreator {
 
             mBuilder.setContentTitle(theme_name)
                     .setProgress(files, 0, true)
-                    .addAction(android.R.color.transparent, mContext.getString(R.string
-                            .notification_hide_upgrade), btPendingIntent)
                     .setSmallIcon(android.R.drawable.ic_popup_sync)
                     .setPriority(notification_priority)
                     .setContentIntent(resultPendingIntent)

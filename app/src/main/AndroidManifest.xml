@@ -19,7 +19,7 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools"
-          package="projekt.substratum"
+          package="org.omnirom.substratum"
           android:installLocation="internalOnly">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
@@ -34,122 +34,31 @@
         tools:ignore="ProtectedPermissions"/>
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.SET_PROCESS_LIMIT"/>
-    <uses-permission android:name="android.permission.SET_WALLPAPER"/>
-    <uses-permission
-        android:name="android.permission.SET_WALLPAPER_COMPONENT"
-        tools:ignore="ProtectedPermissions"/>
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <uses-permission android:name="com.samsung.android.permission.MODIFY_THEME"/>
-    <uses-permission android:name="com.samsung.contacts.permission.THEME"/>
     <uses-permission android:name="projekt.interfacer.permission.ACCESS_SERVICE"/>
 
     <application
-        android:name=".Substratum"
+        android:name="projekt.substratum.Substratum"
         android:allowBackup="false"
         android:icon="@mipmap/main_launcher"
         android:label="@string/app_name"
         android:largeHeap="true"
-        android:manageSpaceActivity=".activities.launch.ManageSpaceActivity"
         android:roundIcon="@mipmap/main_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning,ManifestResource"
         tools:replace="android:allowBackup">
-        <receiver android:name=".services.system.BootCompletedDetector">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
-            </intent-filter>
-        </receiver>
-        <receiver android:name=".services.notification.FloatUiButtonReceiver"/>
-        <receiver android:name=".services.notification.NotificationButtonReceiver"/>
-        <receiver android:name=".services.notification.NotificationUpgradeReceiver"/>
-        <receiver android:name=".services.packages.ThemeUninstallDetector">
-            <intent-filter>
-                <action android:name="android.intent.action.PACKAGE_FULLY_REMOVED"/>
 
-                <data android:scheme="package"/>
-            </intent-filter>
-        </receiver>
-        <receiver android:name=".services.profiles.ScheduledProfileReceiver"/>
-        <receiver android:name=".services.packages.SubstratumUpdateReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
-            </intent-filter>
-        </receiver>
-
-        <service android:name=".services.binder.BinderService"/>
-        <service
-            android:name=".services.floatui.SubstratumFloatInterface"
-            android:exported="false"/>
-        <service
-            android:name=".services.tiles.SubstratumTile"
-            android:enabled="true"
-            android:icon="@drawable/ic_substratum"
-            android:label="@string/app_name"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
-            <intent-filter>
-                <action android:name="android.service.quicksettings.action.QS_TILE"/>
-            </intent-filter>
-        </service>
-        <service
-            android:name=".services.tiles.ShowcaseTile"
-            android:enabled="true"
-            android:icon="@drawable/quicksettings_showcase"
-            android:label="@string/showcase"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
-            <intent-filter>
-                <action android:name="android.service.quicksettings.action.QS_TILE"/>
-            </intent-filter>
-        </service>
-        <service
-            android:name=".services.tiles.FloatUiTile"
-            android:enabled="false"
-            android:icon="@drawable/floatui_tile"
-            android:label="@string/shortcut_floatui"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
-            <intent-filter>
-                <action android:name="android.service.quicksettings.action.QS_TILE"/>
-            </intent-filter>
-
-            <meta-data
-                android:name="android.service.quicksettings.ACTIVE_TILE"
-                android:value="true"/>
-        </service>
-        <service
-            android:name=".services.profiles.ScheduledProfileService"
-            android:permission="android.permission.BIND_JOB_SERVICE"/>
-
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version"/>
-
-        <service
-            android:name=".services.analytics.FirebaseMessagingService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
-            </intent-filter>
-        </service>
-        <service android:name=".services.system.SamsungPackageService"/>
+        <service android:name="projekt.substratum.services.binder.BinderService"/>
 
         <activity
-            android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
-            android:resizeableActivity="false"
-            android:theme="@style/PhotoCrop.ActivityTheme"/>
-        <activity android:name=".activities.launch.AppIntroActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".activities.floatui.FloatUILaunchActivity"
+            android:name="projekt.substratum.activities.launch.ThemeLaunchActivity"
             android:resizeableActivity="false"
             android:theme="@style/Theme.AppCompat.Translucent">
             <intent-filter>
@@ -157,133 +66,32 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.launch.RescueActivity"
-            android:resizeableActivity="false"
-            android:theme="@style/Theme.AppCompat.Translucent">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".activities.launch.ThemeLaunchActivity"
-            android:resizeableActivity="false"
-            android:theme="@style/Theme.AppCompat.Translucent">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".LaunchActivity"
+            android:name=".OmniThemeActivity"
             android:resizeableActivity="false">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
             </intent-filter>
         </activity>
-        <activity
-            android:name=".LauncherActivity"
-            android:resizeableActivity="false">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
 
-            <meta-data
-                android:name="android.app.shortcuts"
-                android:resource="@xml/shortcuts"/>
-        </activity>
         <activity
-            android:name="com.squareup.leakcanary.internal.DisplayLeakActivity"
-            android:enabled="false"
-            android:icon="@mipmap/debug_icon"
-            android:label="@string/debug_app_name"
-            android:resizeableActivity="false"
-            android:taskAffinity="com.squareup.leakcanary.${applicationId}"
-            android:theme="@style/LeakCanaryTheme"
-            tools:replace="android:icon,android:label,android:taskAffinity,android:theme">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".activities.launch.AppShortcutLaunch"
-            android:resizeableActivity="false"
-            android:theme="@style/Theme.AppCompat.Translucent">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".activities.launch.SplashScreenActivity"
-            android:resizeableActivity="false"
-            android:theme="@style/SplashScreen.ActivityTheme">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".MainActivity"
+            android:name="projekt.substratum.InformationActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:resizeableActivity="false"
-            android:theme="@style/AppTheme">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".InformationActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:parentActivityName=".MainActivity"
             android:resizeableActivity="false"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
             </intent-filter>
         </activity>
+
         <activity
-            android:name=".activities.showcase.ShowcaseActivity"
-            android:configChanges="keyboardHidden|screenSize"
+            android:name="projekt.substratum.TeamActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:resizeableActivity="false"
-            android:theme="@style/AppTheme">
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
             </intent-filter>
         </activity>
-        <activity
-            android:name=".activities.studio.StudioPreviewActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:resizeableActivity="false"
-            android:theme="@style/AppTheme">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".activities.studio.StudioSelectorActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:resizeableActivity="false"
-            android:theme="@style/AppTheme">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".util.welcome.AppIntro"
-            android:resizeableActivity="false"
-            android:theme="@style/CustomWelcomeScreenTheme"/>
-        <activity
-            android:name=".activities.profiles.ProfileErrorInfoActivity"
-            android:excludeFromRecents="true"
-            android:label="@string/restore_dialog_title"
-            android:resizeableActivity="false"
-            android:theme="@style/AppTheme.Dialog"/>
-        <activity
-            android:name=".activities.launch.ManageSpaceActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/title_activity_manage_space"
-            android:resizeableActivity="false"
-            android:theme="@style/AppTheme"/>
 
         <provider
             android:name="android.support.v4.content.FileProvider"

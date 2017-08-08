@@ -20,21 +20,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/favorite"
-        android:icon="@drawable/toolbar_not_favorite"
-        android:menuCategory="secondary"
-        android:orderInCategory="1"
-        android:title="@string/menu_favorite"
-        app:showAsAction="ifRoom"/>
-    <item
-        android:id="@+id/changelog"
-        android:icon="@drawable/toolbar_changelog"
-        android:menuCategory="secondary"
-        android:orderInCategory="2"
-        android:title="@string/actionbar_changelog"
-        android:visible="false"
-        app:showAsAction="ifRoom"/>
-    <item
         android:id="@+id/clean"
         android:title="@string/menu_clean"/>
     <item
@@ -47,9 +32,6 @@
         android:id="@+id/enable"
         android:title="@string/menu_enable"/>
     <item
-        android:id="@+id/rate"
-        android:title="@string/menu_rate"/>
-    <item
         android:id="@+id/reboot_device"
         android:title="@string/menu_reboot_device"/>
     <item
@@ -61,4 +43,7 @@
     <item
         android:id="@+id/uninstall"
         android:title="@string/menu_uninstall"/>
+    <item
+        android:id="@+id/about_substratum"
+        android:title="@string/nav_team_contributors"/>
 </menu>

@@ -303,7 +303,7 @@ public class OverlaysItem implements Serializable {
 
     public boolean isOverlayEnabled() {
         return (isPackageInstalled(getFullOverlayParameters()) &&
-                (References.isSamsung(context) || enabledOverlays.contains
+                (enabledOverlays.contains
                         (getFullOverlayParameters())));
     }
 }

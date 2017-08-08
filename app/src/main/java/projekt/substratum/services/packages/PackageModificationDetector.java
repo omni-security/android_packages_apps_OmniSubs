@@ -47,8 +47,8 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import projekt.substratum.InformationActivity;
-import projekt.substratum.MainActivity;
-import projekt.substratum.R;
+import org.omnirom.substratum.OmniThemeActivity;
+import org.omnirom.substratum.R;
 import projekt.substratum.common.References;
 import projekt.substratum.util.compilers.CacheCreator;
 import projekt.substratum.util.helpers.NotificationCreator;
@@ -241,7 +241,7 @@ public class PackageModificationDetector extends BroadcastReceiver {
                 stackBuilder.addNextIntent(myIntent);
                 pIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_CANCEL_CURRENT);
             } else {
-                notificationIntent = new Intent(mContext, MainActivity.class);
+                notificationIntent = new Intent(mContext, OmniThemeActivity.class);
                 pIntent = PendingIntent.getActivity(
                         mContext,
                         0,

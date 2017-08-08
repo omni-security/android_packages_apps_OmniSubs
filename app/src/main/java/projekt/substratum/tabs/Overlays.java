@@ -66,6 +66,9 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.omnirom.substratum.BuildConfig;
+import org.omnirom.substratum.R;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -89,9 +92,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
-import projekt.substratum.BuildConfig;
 import projekt.substratum.InformationActivity;
-import projekt.substratum.R;
 import projekt.substratum.adapters.tabs.overlays.OverlaysAdapter;
 import projekt.substratum.adapters.tabs.overlays.OverlaysItem;
 import projekt.substratum.adapters.tabs.overlays.VariantAdapter;
@@ -102,7 +103,6 @@ import projekt.substratum.common.commands.FileOperations;
 import projekt.substratum.common.platform.ThemeManager;
 import projekt.substratum.util.compilers.SubstratumBuilder;
 import projekt.substratum.util.files.MapUtils;
-import projekt.substratum.util.files.Root;
 
 import static android.content.Context.CLIPBOARD_SERVICE;
 import static android.content.om.OverlayInfo.STATE_APPROVED_ENABLED;
@@ -336,60 +336,40 @@ public class Overlays extends Fragment {
                 }
 
                 if (!checkedOverlays.isEmpty()) {
-                    if (References.isSamsung(getContext())) {
-                        if (Root.checkRootAccess() && Root.requestRootAccess()) {
-                            ArrayList<String> checked_overlays = new ArrayList<>();
-                            for (int i = 0; i < checkedOverlays.size(); i++) {
-                                checked_overlays.add(
-                                        checkedOverlays.get(i).getFullOverlayParameters());
-                            }
-                            ThemeManager.uninstallOverlay(getContext(), checked_overlays);
-                        } else {
-                            for (int i = 0; i < checkedOverlays.size(); i++) {
-                                Uri packageURI = Uri.parse("package:" +
-                                        checkedOverlays.get(i).getFullOverlayParameters());
-                                Intent uninstallIntent =
-                                        new Intent(Intent.ACTION_DELETE, packageURI);
-
-                                startActivity(uninstallIntent);
-                            }
-                        }
-                    } else {
-                        for (int i = 0; i < checkedOverlays.size(); i++) {
-                            FileOperations.mountRW();
-                            FileOperations.delete(getContext(), current_directory +
-                                    checkedOverlays.get(i).getFullOverlayParameters() + ".apk");
-                            mAdapter.notifyDataSetChanged();
-                        }
-                        // Untick all options in the adapter after compiling
-                        toggle_all.setChecked(false);
-                        overlaysLists = ((OverlaysAdapter) mAdapter).getOverlayList();
-                        for (int i = 0; i < overlaysLists.size(); i++) {
-                            OverlaysItem currentOverlay = overlaysLists.get(i);
-                            if (currentOverlay.isSelected()) {
-                                currentOverlay.setSelected(false);
-                            }
-                        }
-                        Toast.makeText(getContext(),
-                                getString(R.string.toast_disabled6),
-                                Toast.LENGTH_SHORT).show();
-                        AlertDialog.Builder alertDialogBuilder =
-                                new AlertDialog.Builder(getContext());
-                        alertDialogBuilder.setTitle(
-                                getString(R.string.legacy_dialog_soft_reboot_title));
-                        alertDialogBuilder.setMessage(
-                                getString(R.string.legacy_dialog_soft_reboot_text));
-                        alertDialogBuilder.setPositiveButton(
-                                android.R.string.ok,
-                                (dialog, id12) -> ElevatedCommands.reboot());
-                        alertDialogBuilder.setNegativeButton(
-                                R.string.remove_dialog_later, (dialog, id1) -> {
-                                    progressBar.setVisibility(View.GONE);
-                                    dialog.dismiss();
-                                });
-                        AlertDialog alertDialog = alertDialogBuilder.create();
-                        alertDialog.show();
+                    for (int i = 0; i < checkedOverlays.size(); i++) {
+                        FileOperations.mountRW();
+                        FileOperations.delete(getContext(), current_directory +
+                                checkedOverlays.get(i).getFullOverlayParameters() + ".apk");
+                        mAdapter.notifyDataSetChanged();
                     }
+                    // Untick all options in the adapter after compiling
+                    toggle_all.setChecked(false);
+                    overlaysLists = ((OverlaysAdapter) mAdapter).getOverlayList();
+                    for (int i = 0; i < overlaysLists.size(); i++) {
+                        OverlaysItem currentOverlay = overlaysLists.get(i);
+                        if (currentOverlay.isSelected()) {
+                            currentOverlay.setSelected(false);
+                        }
+                    }
+                    Toast.makeText(getContext(),
+                            getString(R.string.toast_disabled6),
+                            Toast.LENGTH_SHORT).show();
+                    AlertDialog.Builder alertDialogBuilder =
+                            new AlertDialog.Builder(getContext());
+                    alertDialogBuilder.setTitle(
+                            getString(R.string.legacy_dialog_soft_reboot_title));
+                    alertDialogBuilder.setMessage(
+                            getString(R.string.legacy_dialog_soft_reboot_text));
+                    alertDialogBuilder.setPositiveButton(
+                            android.R.string.ok,
+                            (dialog, id12) -> ElevatedCommands.reboot());
+                    alertDialogBuilder.setNegativeButton(
+                            R.string.remove_dialog_later, (dialog, id1) -> {
+                                progressBar.setVisibility(View.GONE);
+                                dialog.dismiss();
+                            });
+                    AlertDialog alertDialog = alertDialogBuilder.create();
+                    alertDialog.show();
                 } else {
                     if (toggle_all.isChecked()) toggle_all.setChecked(false);
                     is_active = false;
@@ -1103,8 +1083,6 @@ public class Overlays extends Fragment {
 
             String device = Build.MODEL + " (" + Build.DEVICE + ") " +
                     "[" + Build.FINGERPRINT + "]";
-            String xposed = References.checkXposedVersion();
-            if (!xposed.isEmpty()) device += " {" + xposed + "}";
 
             String attachment = String.format(
                     contextRef.get().getString(R.string.logcat_attachment_body),
@@ -1251,17 +1229,10 @@ public class Overlays extends Fragment {
                     }
                 }
 
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-                Boolean showDangerous = !prefs.getBoolean("show_dangerous_samsung_overlays", false);
-
                 values.addAll(overlaysFolder.stream().filter(package_name -> (References
                         .isPackageInstalled(context, package_name) ||
                         References.allowedSystemUIOverlay(package_name) ||
-                        References.allowedSettingsOverlay(package_name)) &&
-                        (!showDangerous || !ThemeManager.blacklisted(
-                                package_name,
-                                References.isSamsung(context) &&
-                                        !References.isSamsungTheme(context, fragment.theme_pid))))
+                        References.allowedSettingsOverlay(package_name)))
                         .collect(Collectors.toList()));
 
                 // Create the map for {package name: package identifier}
@@ -1555,13 +1526,6 @@ public class Overlays extends Fragment {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (References.isSamsung(context) && Root.checkRootAccess()) {
-                if (overlaysWaiting > 0) {
-                    --overlaysWaiting;
-                } else {
-                    progressBar.setVisibility(View.GONE);
-                }
-            }
             refreshList();
         }
     }

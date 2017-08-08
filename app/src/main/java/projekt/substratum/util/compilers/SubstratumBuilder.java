@@ -455,66 +455,55 @@ public class SubstratumBuilder {
                     }
                 }
             } else {
-                Boolean isSamsung = References.isSamsung(context);
-                if (isSamsung) {
-                    // Take account for Samsung's package manager installation mode
-                    Log.d(References.SUBSTRATUM_BUILDER,
-                            "Requesting PackageManager to launch signed overlay APK for " +
-                                    "Samsung environment...");
-                    no_install = Environment.getExternalStorageDirectory()
-                            .getAbsolutePath() + EXTERNAL_STORAGE_CACHE + overlay_package +
-                            "." + parse2_themeName + "-signed.apk";
-                } else {
-                    // At this point, it is detected to be legacy mode and Substratum will push to
-                    // vendor/overlays directly.
-                    String vendor_location = LEGACY_NEXUS_DIR;
-                    String vendor_partition = VENDOR_DIR;
-                    String vendor_symlink = PIXEL_NEXUS_DIR;
+                // At this point, it is detected to be legacy mode and Substratum will push to
+                // vendor/overlays directly.
+                String vendor_location = LEGACY_NEXUS_DIR;
+                String vendor_partition = VENDOR_DIR;
+                String vendor_symlink = PIXEL_NEXUS_DIR;
 
-                    FileOperations.mountRW();
-                    // For Non-Nexus devices
-                    if (!References.inNexusFilter()) {
-                        FileOperations.createNewFolder(vendor_location);
+                FileOperations.mountRW();
+                // For Non-Nexus devices
+                if (!References.inNexusFilter()) {
+                    FileOperations.createNewFolder(vendor_location);
+                    FileOperations.move(context, Environment.getExternalStorageDirectory()
+                            .getAbsolutePath() + EXTERNAL_STORAGE_CACHE + overlay_package +
+                            "." + parse2_themeName + "-signed.apk", vendor_location +
+                            overlay_package + "." + parse2_themeName +
+                            (variant == null ? "" : "." + varianter) + ".apk");
+                    FileOperations.setPermissionsRecursively(644, vendor_location);
+                    FileOperations.setPermissions(755, vendor_location);
+                    FileOperations.setContext(vendor_location);
+                } else {
+                    // For Nexus devices
+                    FileOperations.mountRWVendor();
+                    FileOperations.createNewFolder(vendor_symlink);
+                    FileOperations.createNewFolder(vendor_partition);
+                    // On nexus devices, put framework overlay to /vendor/overlay/
+                    if (overlay_package.equals("android")) {
+                        String android_overlay = vendor_partition + overlay_package + "."
+                                + parse2_themeName + (variant == null ? "" : "." + varianter) +
+                                ".apk";
                         FileOperations.move(context, Environment.getExternalStorageDirectory()
                                 .getAbsolutePath() + EXTERNAL_STORAGE_CACHE + overlay_package +
-                                "." + parse2_themeName + "-signed.apk", vendor_location +
-                                overlay_package + "." + parse2_themeName +
-                                (variant == null ? "" : "." + varianter) + ".apk");
-                        FileOperations.setPermissionsRecursively(644, vendor_location);
-                        FileOperations.setPermissions(755, vendor_location);
-                        FileOperations.setContext(vendor_location);
+                                "." + parse2_themeName + "-signed.apk", android_overlay);
                     } else {
-                        // For Nexus devices
-                        FileOperations.mountRWVendor();
-                        FileOperations.createNewFolder(vendor_symlink);
-                        FileOperations.createNewFolder(vendor_partition);
-                        // On nexus devices, put framework overlay to /vendor/overlay/
-                        if (overlay_package.equals("android")) {
-                            String android_overlay = vendor_partition + overlay_package + "."
-                                    + parse2_themeName + (variant == null ? "" : "." + varianter) +
-                                    ".apk";
-                            FileOperations.move(context, Environment.getExternalStorageDirectory()
-                                    .getAbsolutePath() + EXTERNAL_STORAGE_CACHE + overlay_package +
-                                    "." + parse2_themeName + "-signed.apk", android_overlay);
-                        } else {
-                            String overlay = vendor_symlink + overlay_package + "." +
-                                    parse2_themeName + (variant == null ? "" : "." + varianter) +
-                                    ".apk";
-                            FileOperations.move(context, Environment.getExternalStorageDirectory()
-                                    .getAbsolutePath() + EXTERNAL_STORAGE_CACHE + overlay_package +
-                                    "." + parse2_themeName + "-signed.apk", overlay);
-                            FileOperations.symlink(overlay, vendor_partition);
-                        }
-                        FileOperations.setPermissionsRecursively(644, vendor_symlink);
-                        FileOperations.setPermissionsRecursively(644, vendor_partition);
-                        FileOperations.setPermissions(755, vendor_symlink);
-                        FileOperations.setPermissions(755, vendor_partition);
-                        FileOperations.setContext(vendor_symlink);
-                        FileOperations.setContext(vendor_partition);
-                        FileOperations.mountROVendor();
+                        String overlay = vendor_symlink + overlay_package + "." +
+                                parse2_themeName + (variant == null ? "" : "." + varianter) +
+                                ".apk";
+                        FileOperations.move(context, Environment.getExternalStorageDirectory()
+                                .getAbsolutePath() + EXTERNAL_STORAGE_CACHE + overlay_package +
+                                "." + parse2_themeName + "-signed.apk", overlay);
+                        FileOperations.symlink(overlay, vendor_partition);
                     }
-                    FileOperations.mountRO();
+                    FileOperations.setPermissionsRecursively(644, vendor_symlink);
+                    FileOperations.setPermissionsRecursively(644, vendor_partition);
+                    FileOperations.setPermissions(755, vendor_symlink);
+                    FileOperations.setPermissions(755, vendor_partition);
+                    FileOperations.setContext(vendor_symlink);
+                    FileOperations.setContext(vendor_partition);
+                    FileOperations.mountROVendor();
                 }
+                FileOperations.mountRO();
             }
         }
 

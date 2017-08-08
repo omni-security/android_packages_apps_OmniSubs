@@ -23,7 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
 
-import projekt.substratum.R;
+import org.omnirom.substratum.R;
 
 public class InterfacerAuthorizationReceiver extends BroadcastReceiver {
 

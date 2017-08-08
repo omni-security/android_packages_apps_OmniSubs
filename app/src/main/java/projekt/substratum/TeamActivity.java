@@ -16,32 +16,44 @@
  * along with Substratum.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package projekt.substratum.fragments;
+package projekt.substratum;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.Lunchbar;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.support.v7.widget.Toolbar;
 import android.widget.Button;
 
-import projekt.substratum.R;
+import org.omnirom.substratum.R;
 
-public class TeamFragment extends Fragment {
+import projekt.substratum.activities.base.SubstratumActivity;
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle
-            savedInstanceState) {
+public class TeamActivity extends SubstratumActivity {
+
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ViewGroup root = (ViewGroup) inflater.inflate(R.layout.team_fragment, container, false);
+        setContentView(R.layout.team_activity);
 
-        CardView nicholas_card = root.findViewById(R.id.nicholas_card);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        if (toolbar != null) toolbar.setTitle(R.string.nav_team_contributors);
+
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
+        if (toolbar != null) toolbar.setNavigationOnClickListener(v -> onBackPressed());
+
+        AppBarLayout appBarLayout = findViewById(R.id.appbar);
+        appBarLayout.setExpanded(false, false);
+        appBarLayout.setActivated(false);
+
+        CardView nicholas_card = findViewById(R.id.nicholas_card);
         nicholas_card.setOnClickListener(v -> {
             try {
                 String playURL = getString(R.string.team_nicholas_link);
@@ -49,15 +61,14 @@ public class TeamFragment extends Fragment {
                 i.setData(Uri.parse(playURL));
                 startActivity(i);
             } catch (ActivityNotFoundException activityNotFoundException) {
-                if (getActivity() != null)
-                    Lunchbar.make(getActivity().findViewById(android.R.id.content),
+                    Lunchbar.make(findViewById(android.R.id.content),
                             getString(R.string.activity_missing_toast),
                             Lunchbar.LENGTH_LONG)
                             .show();
             }
         });
 
-        CardView syko_card = root.findViewById(R.id.syko_card);
+        CardView syko_card = findViewById(R.id.syko_card);
         syko_card.setOnClickListener(v -> {
             try {
                 String playURL = getString(R.string.team_syko_link);
@@ -65,15 +76,14 @@ public class TeamFragment extends Fragment {
                 i.setData(Uri.parse(playURL));
                 startActivity(i);
             } catch (ActivityNotFoundException activityNotFoundException) {
-                if (getActivity() != null)
-                    Lunchbar.make(getActivity().findViewById(android.R.id.content),
+                    Lunchbar.make(findViewById(android.R.id.content),
                             getString(R.string.activity_missing_toast),
                             Lunchbar.LENGTH_LONG)
                             .show();
             }
         });
 
-        CardView ivan_card = root.findViewById(R.id.ivan_card);
+        CardView ivan_card = findViewById(R.id.ivan_card);
         ivan_card.setOnClickListener(v -> {
             try {
                 String playURL = getString(R.string.team_ivan_link);
@@ -81,31 +91,33 @@ public class TeamFragment extends Fragment {
                 i.setData(Uri.parse(playURL));
                 startActivity(i);
             } catch (ActivityNotFoundException activityNotFoundException) {
-                if (getActivity() != null)
-                    Lunchbar.make(getActivity().findViewById(android.R.id.content),
+                    Lunchbar.make(findViewById(android.R.id.content),
                             getString(R.string.activity_missing_toast),
                             Lunchbar.LENGTH_LONG)
                             .show();
             }
         });
 
-        CardView surge_card = root.findViewById(R.id.surge_card);
+        CardView surge_card = findViewById(R.id.surge_card);
         surge_card.setOnClickListener(v -> {
             try {
                 String playURL = getString(R.string.team_surge_link);
                 Intent i = new Intent(Intent.ACTION_VIEW);
                 i.setData(Uri.parse(playURL));
                 startActivity(i);
-            } catch (ActivityNotFoundException activityNotFoundException) {
-                if (getActivity() != null)
-                    Lunchbar.make(getActivity().findViewById(android.R.id.content),
+                    Lunchbar.make(findViewById(android.R.id.content),
                             getString(R.string.activity_missing_toast),
                             Lunchbar.LENGTH_LONG)
                             .show();
+            } catch (ActivityNotFoundException activityNotFoundException) {
+                Lunchbar.make(findViewById(android.R.id.content),
+                        getString(R.string.activity_missing_toast),
+                        Lunchbar.LENGTH_LONG)
+                        .show();
             }
         });
 
-        CardView george_card = root.findViewById(R.id.george_card);
+        CardView george_card = findViewById(R.id.george_card);
         george_card.setOnClickListener(v -> {
             try {
                 String playURL = getString(R.string.team_george_link);
@@ -113,15 +125,14 @@ public class TeamFragment extends Fragment {
                 i.setData(Uri.parse(playURL));
                 startActivity(i);
             } catch (ActivityNotFoundException activityNotFoundException) {
-                if (getActivity() != null)
-                    Lunchbar.make(getActivity().findViewById(android.R.id.content),
+                    Lunchbar.make(findViewById(android.R.id.content),
                             getString(R.string.activity_missing_toast),
                             Lunchbar.LENGTH_LONG)
                             .show();
             }
         });
 
-        CardView nathan_card = root.findViewById(R.id.nathan_card);
+        CardView nathan_card = findViewById(R.id.nathan_card);
         nathan_card.setOnClickListener(v -> {
             try {
                 String playURL = getString(R.string.team_nathan_link);
@@ -129,15 +140,14 @@ public class TeamFragment extends Fragment {
                 i.setData(Uri.parse(playURL));
                 startActivity(i);
             } catch (ActivityNotFoundException activityNotFoundException) {
-                if (getActivity() != null)
-                    Lunchbar.make(getActivity().findViewById(android.R.id.content),
+                    Lunchbar.make(findViewById(android.R.id.content),
                             getString(R.string.activity_missing_toast),
                             Lunchbar.LENGTH_LONG)
                             .show();
             }
         });
 
-        CardView char_card = root.findViewById(R.id.char_card);
+        CardView char_card = findViewById(R.id.char_card);
         char_card.setOnClickListener(v -> {
             try {
                 String playURL = getString(R.string.team_char_link);
@@ -145,17 +155,16 @@ public class TeamFragment extends Fragment {
                 i.setData(Uri.parse(playURL));
                 startActivity(i);
             } catch (ActivityNotFoundException activityNotFoundException) {
-                if (getActivity() != null)
-                    Lunchbar.make(getActivity().findViewById(android.R.id.content),
+                    Lunchbar.make(findViewById(android.R.id.content),
                             getString(R.string.activity_missing_toast),
                             Lunchbar.LENGTH_LONG)
                             .show();
             }
         });
 
-        Button development_contributors = root.findViewById(R.id.list_button_contributors);
+        Button development_contributors = findViewById(R.id.list_button_contributors);
         development_contributors.setOnClickListener(v -> {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setItems(getResources().getStringArray(R.array.substratum_contributors),
                     (dialog, item) -> {
                     });
@@ -163,7 +172,7 @@ public class TeamFragment extends Fragment {
             alert.show();
         });
 
-        Button contribute = root.findViewById(R.id.list_button_translators_contribute);
+        Button contribute = findViewById(R.id.list_button_translators_contribute);
         contribute.setOnClickListener(v -> {
             try {
                 String playURL = getString(R.string.crowdin_url);
@@ -171,17 +180,16 @@ public class TeamFragment extends Fragment {
                 i.setData(Uri.parse(playURL));
                 startActivity(i);
             } catch (ActivityNotFoundException activityNotFoundException) {
-                if (getActivity() != null)
-                    Lunchbar.make(getActivity().findViewById(android.R.id.content),
+                    Lunchbar.make(findViewById(android.R.id.content),
                             getString(R.string.activity_missing_toast),
                             Lunchbar.LENGTH_LONG)
                             .show();
             }
         });
 
-        Button layers = root.findViewById(R.id.list_button_layers);
+        Button layers = findViewById(R.id.list_button_layers);
         layers.setOnClickListener(v -> {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setItems(getResources().getStringArray(R.array.layers_contributors),
                     (dialog, item) -> {
                     });
@@ -189,13 +197,13 @@ public class TeamFragment extends Fragment {
             alert.show();
         });
 
-        Button translators = root.findViewById(R.id.list_button_translators);
+        Button translators = findViewById(R.id.list_button_translators);
         translators.setOnClickListener(v -> {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setItems(getResources().getStringArray(R.array.translations),
                     (dialog, item) -> {
                         dialog.cancel();
-                        AlertDialog.Builder builder2 = new AlertDialog.Builder(getActivity());
+                        AlertDialog.Builder builder2 = new AlertDialog.Builder(this);
                         switch (item) {
                             case 0:
                                 builder2.setItems(
@@ -305,6 +313,5 @@ public class TeamFragment extends Fragment {
             AlertDialog alert = builder.create();
             alert.show();
         });
-        return root;
     }
 }

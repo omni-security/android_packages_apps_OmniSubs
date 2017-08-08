@@ -22,7 +22,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.app.ProgressDialog;
-import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -31,20 +30,15 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.Lunchbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.content.LocalBroadcastManager;
@@ -65,16 +59,12 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.flaviofaria.kenburnsview.KenBurnsView;
 import com.gordonwong.materialsheetfab.MaterialSheetFab;
 import com.gordonwong.materialsheetfab.MaterialSheetFabEventListener;
-import com.theartofdev.edmodo.cropper.CropImage;
 
-import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.omnirom.substratum.R;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -85,25 +75,15 @@ import projekt.substratum.common.References;
 import projekt.substratum.common.commands.ElevatedCommands;
 import projekt.substratum.common.commands.FileOperations;
 import projekt.substratum.common.platform.ThemeManager;
-import projekt.substratum.common.tabs.WallpaperManager;
-import projekt.substratum.services.system.SamsungPackageService;
 import projekt.substratum.util.files.Root;
 import projekt.substratum.util.views.FloatingActionMenu;
-import projekt.substratum.util.views.SheetDialog;
 
 import static android.content.om.OverlayInfo.STATE_APPROVED_DISABLED;
 import static android.content.om.OverlayInfo.STATE_APPROVED_ENABLED;
-import static com.bumptech.glide.request.RequestOptions.centerCropTransform;
 import static projekt.substratum.common.References.BYPASS_SUBSTRATUM_BUILDER_DELETION;
 import static projekt.substratum.common.References.MANAGER_REFRESH;
-import static projekt.substratum.common.References.bootAnimationsFragment;
-import static projekt.substratum.common.References.fontsFragment;
-import static projekt.substratum.common.References.isSamsung;
 import static projekt.substratum.common.References.metadataOverlayParent;
-import static projekt.substratum.common.References.metadataWallpapers;
 import static projekt.substratum.common.References.overlaysFragment;
-import static projekt.substratum.common.References.soundsFragment;
-import static projekt.substratum.common.References.wallpaperFragment;
 
 public class InformationActivity extends SubstratumActivity {
 
@@ -115,24 +95,16 @@ public class InformationActivity extends SubstratumActivity {
     public static byte[] iv_encrypt_key;
     public static Lunchbar currentShownLunchBar;
     private static List<String> tab_checker;
-    private static String wallpaperUrl;
     private Boolean uninstalled = false;
-    private KenBurnsView kenBurnsView;
     private byte[] byteArray;
-    private Bitmap heroImageBitmap;
     private SharedPreferences prefs;
     private AppBarLayout appBarLayout;
-    private CollapsingToolbarLayout collapsingToolbarLayout;
-    private View gradientView;
     private TabLayout tabLayout;
     private ProgressDialog mProgressDialog;
-    private MenuItem favorite;
-    private boolean shouldDarken;
     private MaterialSheetFab materialSheetFab;
     private int tabPosition;
     private LocalBroadcastManager localBroadcastManager;
     private BroadcastReceiver refreshReceiver;
-    private AsyncTask<String, Integer, String> layoutLoader;
 
     public static String getThemeName() {
         return theme_name;
@@ -148,10 +120,6 @@ public class InformationActivity extends SubstratumActivity {
 
     public static byte[] getIVEncryptKey() {
         return iv_encrypt_key;
-    }
-
-    public static String getWallpaperUrl() {
-        return wallpaperUrl;
     }
 
     public static Lunchbar getCurrentShownLunchBar() {
@@ -210,93 +178,9 @@ public class InformationActivity extends SubstratumActivity {
         return darkness < 0.5;
     }
 
-    private Drawable grabPackageHeroImage(String package_name) {
-        Resources res;
-        Drawable hero = null;
-        try {
-            res = getPackageManager().getResourcesForApplication(package_name);
-            int resourceId = res.getIdentifier(package_name + ":drawable/heroimage", null, null);
-            if (0 != resourceId) {
-                hero = getPackageManager().getDrawable(package_name, resourceId, null);
-            }
-            return hero;
-        } catch (Exception e) {
-            // Exception
-        }
-        return null;
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        // Image Cropper Request Capture
-        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
-            CropImage.ActivityResult result = CropImage.getActivityResult(data);
-            if (resultCode == RESULT_OK) {
-                SharedPreferences.Editor editor = prefs.edit();
-                Uri resultUri = result.getUri();
-                if (resultUri.toString().contains("homescreen_wallpaper")) {
-                    try {
-                        WallpaperManager.setWallpaper(
-                                getApplicationContext(),
-                                resultUri.toString().substring(7),
-                                "home");
-                        editor.putString("home_wallpaper_applied", theme_pid);
-                        currentShownLunchBar = Lunchbar.make(getView(),
-                                getString(R.string.wallpaper_homescreen_success),
-                                Lunchbar.LENGTH_LONG);
-                        currentShownLunchBar.show();
-                    } catch (IOException e) {
-                        currentShownLunchBar = Lunchbar.make(getView(),
-                                getString(R.string.wallpaper_homescreen_error),
-                                Lunchbar.LENGTH_LONG);
-                        currentShownLunchBar.show();
-                        e.printStackTrace();
-                    }
-                } else if (resultUri.toString().contains("lockscreen_wallpaper")) {
-                    try {
-                        WallpaperManager.setWallpaper(
-                                getApplicationContext(),
-                                resultUri.toString().substring(7),
-                                "lock");
-                        editor.putString("lock_wallpaper_applied", theme_pid);
-                        currentShownLunchBar = Lunchbar.make(getView(),
-                                getString(R.string.wallpaper_lockscreen_success),
-                                Lunchbar.LENGTH_LONG);
-                        currentShownLunchBar.show();
-                    } catch (IOException e) {
-                        currentShownLunchBar = Lunchbar.make(getView(),
-                                getString(R.string.wallpaper_lockscreen_error),
-                                Lunchbar.LENGTH_LONG);
-                        currentShownLunchBar.show();
-                        e.printStackTrace();
-                    }
-                } else if (resultUri.toString().contains("all_wallpaper")) {
-                    try {
-                        WallpaperManager.setWallpaper(
-                                getApplicationContext(),
-                                resultUri.toString().substring(7),
-                                "all");
-                        editor.putString("home_wallpaper_applied", theme_pid);
-                        editor.putString("lock_wallpaper_applied", theme_pid);
-                        currentShownLunchBar = Lunchbar.make(getView(),
-                                getString(R.string.wallpaper_allscreen_success),
-                                Lunchbar.LENGTH_LONG);
-                        currentShownLunchBar.show();
-                    } catch (IOException e) {
-                        currentShownLunchBar = Lunchbar.make(getView(),
-                                getString(R.string.wallpaper_allscreen_error),
-                                Lunchbar.LENGTH_LONG);
-                        currentShownLunchBar.show();
-                        e.printStackTrace();
-                    }
-                }
-                editor.apply();
-            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
-                Log.e("SubstratumImageCropper",
-                        "There has been an error processing the image...");
-            }
-        }
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -313,29 +197,12 @@ public class InformationActivity extends SubstratumActivity {
         localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
         localBroadcastManager.registerReceiver(refreshReceiver, if1);
 
-        boolean dynamicActionBarColors = getResources().getBoolean(R.bool.dynamicActionBarColors);
-        boolean dynamicNavBarColors = getResources().getBoolean(R.bool.dynamicNavigationBarColors);
-
         Intent currentIntent = getIntent();
         theme_name = currentIntent.getStringExtra("theme_name");
         theme_pid = currentIntent.getStringExtra("theme_pid");
         theme_mode = currentIntent.getStringExtra("theme_mode");
         encryption_key = currentIntent.getByteArrayExtra("encryption_key");
         iv_encrypt_key = currentIntent.getByteArrayExtra("iv_encrypt_key");
-        wallpaperUrl = null;
-
-        try {
-            ApplicationInfo appInfo =
-                    getApplicationContext().getPackageManager().getApplicationInfo(
-                            theme_pid,
-                            PackageManager.GET_META_DATA);
-            if (appInfo.metaData != null &&
-                    appInfo.metaData.getString(metadataWallpapers) != null) {
-                wallpaperUrl = appInfo.metaData.getString(metadataWallpapers);
-            }
-        } catch (Exception e) {
-            // NameNotFound
-        }
 
         if (theme_mode == null) {
             theme_mode = "";
@@ -343,10 +210,6 @@ public class InformationActivity extends SubstratumActivity {
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         if (toolbar != null) toolbar.setTitle(theme_name);
-
-        gradientView = findViewById(R.id.gradientView);
-        collapsingToolbarLayout = findViewById(R.id.collapsing_toolbar_tabbed_layout);
-        if (collapsingToolbarLayout != null) collapsingToolbarLayout.setTitle(theme_name);
 
         final ViewPager viewPager = findViewById(R.id.viewpager);
 
@@ -357,31 +220,9 @@ public class InformationActivity extends SubstratumActivity {
         }
         if (toolbar != null) toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
-        Drawable heroImage = grabPackageHeroImage(theme_pid);
-        if (heroImage != null) heroImageBitmap = ((BitmapDrawable) heroImage).getBitmap();
-        int dominantColor;
-        if (heroImageBitmap == null) {
-            dominantColor = Color.TRANSPARENT;
-        } else {
-            dominantColor = getDominantColor(heroImageBitmap);
-        }
-
         appBarLayout = findViewById(R.id.appbar);
-        appBarLayout.setBackgroundColor(dominantColor);
-
-        if (collapsingToolbarLayout != null &&
-                dynamicActionBarColors &&
-                prefs.getBoolean("dynamic_actionbar", true)) {
-            collapsingToolbarLayout.setStatusBarScrimColor(dominantColor);
-            collapsingToolbarLayout.setContentScrimColor(dominantColor);
-        }
-
-        if (dynamicNavBarColors && prefs.getBoolean("dynamic_navbar", true)) {
-            getWindow().setNavigationBarColor(dominantColor);
-            if (checkColorDarkness(dominantColor)) {
-                getWindow().setNavigationBarColor(getColor(R.color.theme_information_background));
-            }
-        }
+        appBarLayout.setExpanded(false, false);
+        appBarLayout.setActivated(false);
 
         View sheetView = findViewById(R.id.fab_sheet);
         View overlay = findViewById(R.id.overlay);
@@ -401,7 +242,6 @@ public class InformationActivity extends SubstratumActivity {
                     fabColor);
         }
 
-        layoutLoader = new LayoutLoader().execute("");
         tabLayout = findViewById(R.id.tabs);
         if (tabLayout != null) {
             if (theme_mode.equals("")) {
@@ -410,36 +250,12 @@ public class InformationActivity extends SubstratumActivity {
                             (theme_pid, 0);
                     AssetManager am = otherContext.getAssets();
                     List found_folders = Arrays.asList(am.list(""));
-                    tab_checker = new ArrayList<>();
-                    if (!References.checkOMS(getApplicationContext())) {
-                        for (int i = 0; i < found_folders.size(); i++) {
-                            if (References.allowedForLegacy(found_folders.get(i).toString())) {
-                                tab_checker.add(found_folders.get(i).toString());
-                            }
-                        }
-                    } else {
-                        tab_checker = Arrays.asList(am.list(""));
-                    }
+                    tab_checker = Arrays.asList(am.list(""));
+
                     if (tab_checker.contains(overlaysFragment) ||
                             tab_checker.contains("overlays_legacy")) {
                         tabLayout.addTab(tabLayout.newTab().setText(getString(R.string
                                 .theme_information_tab_one)));
-                    }
-                    if (tab_checker.contains(bootAnimationsFragment)) {
-                        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string
-                                .theme_information_tab_two)));
-                    }
-                    if (tab_checker.contains(fontsFragment) && References.isFontsSupported()) {
-                        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string
-                                .theme_information_tab_three)));
-                    }
-                    if (tab_checker.contains(soundsFragment)) {
-                        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string
-                                .theme_information_tab_four)));
-                    }
-                    if (wallpaperUrl != null) {
-                        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string
-                                .theme_information_tab_five)));
                     }
                 } catch (Exception e) {
                     Log.e(References.SUBSTRATUM_LOG, "Could not refresh list of asset folders.");
@@ -450,65 +266,25 @@ public class InformationActivity extends SubstratumActivity {
                         tabLayout.addTab(tabLayout.newTab().setText(
                                 getString(R.string.theme_information_tab_one)));
                         break;
-                    case bootAnimationsFragment:
-                        tabLayout.addTab(tabLayout.newTab().setText(
-                                getString(R.string.theme_information_tab_two)));
-                        break;
-                    case fontsFragment:
-                        tabLayout.addTab(tabLayout.newTab().setText(
-                                getString(R.string.theme_information_tab_three)));
-                        break;
-                    case soundsFragment:
-                        tabLayout.addTab(tabLayout.newTab().setText(
-                                getString(R.string.theme_information_tab_four)));
-                        break;
-                    case wallpaperFragment:
-                        tabLayout.addTab(tabLayout.newTab().setText(
-                                getString(R.string.theme_information_tab_five)));
-                        break;
                 }
             }
 
             tabLayout.setTabGravity(TabLayout.MODE_SCROLLABLE);
-            if (dynamicActionBarColors && prefs.getBoolean("dynamic_actionbar", true))
-                tabLayout.setBackgroundColor(dominantColor);
 
-            if (collapsingToolbarLayout != null && checkColorDarkness(dominantColor) &&
-                    dynamicActionBarColors && prefs.getBoolean("dynamic_actionbar", true)) {
-                collapsingToolbarLayout.setCollapsedTitleTextColor(
-                        getColor(R.color.information_activity_dark_icon_mode));
-                collapsingToolbarLayout.setExpandedTitleColor(
-                        getColor(R.color.information_activity_dark_icon_mode));
-                tabLayout.setTabTextColors(
-                        getColor(R.color.information_activity_dark_text_mode),
-                        getColor(R.color.information_activity_dark_text_mode));
+            tabLayout.setTabTextColors(
+                    getColor(R.color.information_activity_light_text_mode),
+                    getColor(R.color.information_activity_light_text_mode));
 
-                Drawable upArrow = getDrawable(R.drawable.information_activity_back_dark);
-                if (upArrow != null)
-                    upArrow.setColorFilter(getColor(R.color.information_activity_dark_icon_mode),
-                            PorterDuff.Mode.SRC_ATOP);
-                getSupportActionBar().setHomeAsUpIndicator(upArrow);
-                setOverflowButtonColor(this, true);
-            } else if (collapsingToolbarLayout != null) {
-                collapsingToolbarLayout.setCollapsedTitleTextColor(
-                        getColor(R.color.information_activity_light_icon_mode));
-                collapsingToolbarLayout.setExpandedTitleColor(
-                        getColor(R.color.information_activity_light_icon_mode));
-                tabLayout.setTabTextColors(
-                        getColor(R.color.information_activity_light_text_mode),
-                        getColor(R.color.information_activity_light_text_mode));
-
-                Drawable upArrow = getDrawable(R.drawable.information_activity_back_light);
-                if (upArrow != null)
-                    upArrow.setColorFilter(getColor(R.color.information_activity_light_icon_mode),
-                            PorterDuff.Mode.SRC_ATOP);
-                getSupportActionBar().setHomeAsUpIndicator(upArrow);
-                setOverflowButtonColor(this, false);
-            }
+            Drawable upArrow = getDrawable(R.drawable.information_activity_back_light);
+            if (upArrow != null)
+                upArrow.setColorFilter(getColor(R.color.information_activity_light_icon_mode),
+                        PorterDuff.Mode.SRC_ATOP);
+            getSupportActionBar().setHomeAsUpIndicator(upArrow);
+            setOverflowButtonColor(this, false);
         }
         final InformationTabsAdapter adapter = new InformationTabsAdapter
                 (getSupportFragmentManager(), (tabLayout != null) ? tabLayout.getTabCount() : 0,
-                        theme_mode, tab_checker, wallpaperUrl);
+                        theme_mode, tab_checker);
 
         if (viewPager != null) {
             viewPager.setOffscreenPageLimit((tabLayout != null) ? tabLayout.getTabCount() : 0);
@@ -524,16 +300,6 @@ public class InformationActivity extends SubstratumActivity {
                                     floatingActionButton.show();
                                     floatingActionButton.setImageResource(
                                             R.drawable.floating_action_button_icon);
-                                    break;
-                                case "BootAnimations":
-                                case "Fonts":
-                                case "Sounds":
-                                    floatingActionButton.show();
-                                    floatingActionButton.setImageResource(
-                                            R.drawable.floating_action_button_icon_check);
-                                    break;
-                                case "Wallpapers":
-                                    floatingActionButton.hide();
                                     break;
                             }
                         }
@@ -568,18 +334,6 @@ public class InformationActivity extends SubstratumActivity {
                             case "Overlays":
                                 materialSheetFab.showSheet();
                                 break;
-                            case "BootAnimations":
-                                intent = new Intent("BootAnimations.START_JOB");
-                                localBroadcastManager.sendBroadcast(intent);
-                                break;
-                            case "Fonts":
-                                intent = new Intent("Fonts.START_JOB");
-                                localBroadcastManager.sendBroadcast(intent);
-                                break;
-                            case "Sounds":
-                                intent = new Intent("Sounds.START_JOB");
-                                localBroadcastManager.sendBroadcast(intent);
-                                break;
                         }
                     }, isLunchbarOpen ? LUNCHBAR_DISMISS_FAB_CLICK_DELAY : 0);
                 } catch (NullPointerException npe) {
@@ -589,12 +343,8 @@ public class InformationActivity extends SubstratumActivity {
 
             Intent intent = new Intent("Overlays.START_JOB");
             Switch enable_swap = findViewById(R.id.enable_swap);
-            if (!References.checkOMS(this) && !References.isSamsung(getApplicationContext())) {
+            if (!References.checkOMS(this)) {
                 enable_swap.setText(getString(R.string.fab_menu_swap_toggle_legacy));
-            } else if (References.isSamsung(getApplicationContext())) {
-                View fab_menu_divider = findViewById(R.id.fab_menu_divider);
-                fab_menu_divider.setVisibility(View.GONE);
-                enable_swap.setVisibility(View.GONE);
             }
             if (enable_swap != null) {
                 boolean enabled = prefs.getBoolean("enable_swapping_overlays", true);
@@ -683,21 +433,6 @@ public class InformationActivity extends SubstratumActivity {
                     materialSheetFab.hideSheet();
                 });
             }
-
-            Boolean shouldShowSamsungWarning =
-                    !prefs.getBoolean("show_dangerous_samsung_overlays", false);
-            if (References.isSamsung(getApplicationContext()) &&
-                    !References.isSamsungTheme(getApplicationContext(), theme_pid) &&
-                    shouldShowSamsungWarning) {
-                currentShownLunchBar = Lunchbar.make(
-                        getView(),
-                        R.string.toast_samsung_prototype_alert,
-                        Lunchbar.LENGTH_SHORT);
-                currentShownLunchBar.show();
-            }
-            if (References.isSamsung(getApplicationContext())) {
-                startService(new Intent(getBaseContext(), SamsungPackageService.class));
-            }
         }
     }
 
@@ -705,49 +440,8 @@ public class InformationActivity extends SubstratumActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.theme_information_menu, menu);
 
-        // Start formalizing a check for dark icons
-        Drawable heroImage = grabPackageHeroImage(theme_pid);
-        if (heroImage != null) {
-            heroImageBitmap = ((BitmapDrawable) heroImage).getBitmap();
-        }
-        int dominantColor;
-        if (heroImageBitmap == null) {
-            dominantColor = Color.TRANSPARENT;
-        } else {
-            dominantColor = getDominantColor(heroImageBitmap);
-        }
-        boolean dynamicActionBarColors = getResources().getBoolean(R.bool.dynamicActionBarColors);
-        shouldDarken = collapsingToolbarLayout != null &&
-                checkColorDarkness(dominantColor) &&
-                dynamicActionBarColors && prefs.getBoolean("dynamic_actionbar", true);
-
         // Start dynamically showing menu items
         boolean isOMS = References.checkOMS(getApplicationContext());
-        boolean isMR1orHigher = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1;
-
-        if (!isMR1orHigher) menu.findItem(R.id.favorite).setVisible(false);
-        if (isMR1orHigher) {
-            favorite = menu.findItem(R.id.favorite);
-            if (prefs.contains("app_shortcut_theme")) {
-                if (prefs.getString("app_shortcut_theme", "").equals(theme_pid)) {
-                    favorite.setIcon(getDrawable(R.drawable.toolbar_favorite));
-                } else {
-                    favorite.setIcon(getDrawable(R.drawable.toolbar_not_favorite));
-                }
-            } else {
-                favorite.setIcon(getDrawable(R.drawable.toolbar_not_favorite));
-            }
-            if (shouldDarken) favorite.getIcon().setColorFilter(
-                    getColor(R.color.information_activity_dark_icon_mode),
-                    PorterDuff.Mode.SRC_ATOP);
-        }
-        if (References.grabThemeChangelog(getApplicationContext(), theme_pid) != null) {
-            MenuItem changelog = menu.findItem(R.id.changelog);
-            changelog.setVisible(true);
-            if (shouldDarken) changelog.getIcon().setColorFilter(
-                    getColor(R.color.information_activity_dark_icon_mode),
-                    PorterDuff.Mode.SRC_ATOP);
-        }
 
         if (!isOMS && !Root.checkRootAccess()) {
             menu.findItem(R.id.restart_systemui).setVisible(false);
@@ -756,8 +450,7 @@ public class InformationActivity extends SubstratumActivity {
             menu.findItem(R.id.disable).setVisible(false);
             menu.findItem(R.id.enable).setVisible(false);
         }
-        if (isOMS || isSamsung(getApplicationContext())) {
-            if (isSamsung(getApplicationContext())) menu.findItem(R.id.clean).setVisible(false);
+        if (isOMS) {
             menu.findItem(R.id.reboot_device).setVisible(false);
             menu.findItem(R.id.soft_reboot).setVisible(false);
             menu.findItem(R.id.uninstall).setVisible(false);
@@ -777,43 +470,6 @@ public class InformationActivity extends SubstratumActivity {
         int id = item.getItemId();
 
         switch (id) {
-            case R.id.favorite:
-                if (prefs.contains("app_shortcut_theme")) {
-                    if (prefs.getString("app_shortcut_theme", "").equals(theme_pid)) {
-                        new AppShortcutClearer().execute("");
-                    } else {
-                        new AppShortcutCreator().execute("favorite");
-                    }
-                } else {
-                    new AppShortcutCreator().execute("favorite");
-                }
-                return true;
-            case R.id.changelog:
-                SheetDialog sheetDialog = new SheetDialog(this);
-                @SuppressLint("InflateParams")
-                View sheetView = getLayoutInflater().inflate(R.layout.changelog_sheet_dialog, null);
-
-                LinearLayout titleBox = sheetView.findViewById(R.id.title_box);
-                TextView title = titleBox.findViewById(R.id.title);
-                String format_me = String.format(getString(R.string.changelog_title), theme_name);
-                title.setText(format_me);
-
-                LinearLayout textBox = sheetView.findViewById(R.id.text_box);
-                TextView text = textBox.findViewById(R.id.text);
-
-                String[] changelog_parsing =
-                        References.grabThemeChangelog(getApplicationContext(), theme_pid);
-                StringBuilder to_show = new StringBuilder();
-                if (changelog_parsing != null) {
-                    for (String aChangelog_parsing : changelog_parsing) {
-                        to_show.append("\u2022 ").append(aChangelog_parsing).append("\n");
-                    }
-                }
-                text.setText(to_show.toString());
-                sheetDialog.setCanceledOnTouchOutside(true);
-                sheetDialog.setContentView(sheetView);
-                sheetDialog.show();
-                return true;
             case R.id.clean:
                 AlertDialog.Builder builder1 = new AlertDialog.Builder(InformationActivity.this);
                 builder1.setTitle(theme_name);
@@ -971,29 +627,16 @@ public class InformationActivity extends SubstratumActivity {
                 builder4.create();
                 builder4.show();
                 return true;
-            case R.id.rate:
-                try {
-                    String playURL = "https://play.google.com/store/apps/details?id=" + theme_pid;
-                    Intent i = new Intent(Intent.ACTION_VIEW);
-                    i.setData(Uri.parse(playURL));
-                    startActivity(i);
-                } catch (ActivityNotFoundException activityNotFoundException) {
-                    currentShownLunchBar = Lunchbar.make(getView(),
-                            getString(R.string.activity_missing_toast),
-                            Lunchbar.LENGTH_LONG);
-                    currentShownLunchBar.show();
-                }
-                return true;
             case R.id.uninstall:
                 AlertDialog.Builder builder5 = new AlertDialog.Builder(InformationActivity.this);
                 builder5.setTitle(theme_name);
                 builder5.setIcon(References.grabAppIcon(getApplicationContext(), theme_pid));
                 builder5.setMessage(R.string.uninstall_dialog_text)
                         .setPositiveButton(R.string.dialog_ok, (dialog, id12) -> {
-                               // Dismiss the dialog
-                               dialog.dismiss();
-                               new uninstallTheme().execute("");
-                         })
+                            // Dismiss the dialog
+                            dialog.dismiss();
+                            new uninstallTheme().execute("");
+                        })
                         .setNegativeButton(R.string.dialog_cancel, (dialog, id1) -> {
                             // User cancelled the dialog
                         });
@@ -1009,6 +652,9 @@ public class InformationActivity extends SubstratumActivity {
                 return true;
             case R.id.soft_reboot:
                 ElevatedCommands.softReboot();
+                return true;
+            case R.id.about_substratum:
+                startActivity(new Intent(this, TeamActivity.class));
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -1029,10 +675,6 @@ public class InformationActivity extends SubstratumActivity {
     public void onDestroy() {
         super.onDestroy();
 
-        if (References.isSamsung(getApplicationContext())) {
-            stopService(new Intent(getBaseContext(), SamsungPackageService.class));
-        }
-
         try {
             localBroadcastManager.unregisterReceiver(refreshReceiver);
         } catch (IllegalArgumentException e) {
@@ -1045,10 +687,6 @@ public class InformationActivity extends SubstratumActivity {
         theme_mode = null;
         encryption_key = null;
         iv_encrypt_key = null;
-        wallpaperUrl = null;
-        kenBurnsView = null;
-        if (layoutLoader != null) layoutLoader.cancel(true);
-        heroImageBitmap = null;
 
         if (!BYPASS_SUBSTRATUM_BUILDER_DELETION &&
                 !References.isCachingEnabled(getApplicationContext())) {
@@ -1058,92 +696,6 @@ public class InformationActivity extends SubstratumActivity {
             FileOperations.delete(getApplicationContext(), deleted.getAbsolutePath());
             if (!deleted.exists()) Log.d(References.SUBSTRATUM_BUILDER,
                     "Successfully cleared Substratum cache!");
-        }
-    }
-
-    private class LayoutLoader extends AsyncTask<String, Integer, String> {
-
-        @Override
-        protected void onPostExecute(String result) {
-            super.onPostExecute(result);
-
-            if (!prefs.getBoolean("complexion", false)) {
-                if (gradientView != null)
-                    gradientView.setVisibility(View.GONE);
-                if (kenBurnsView != null)
-                    kenBurnsView.setBackgroundColor(Color.parseColor("#ffff00"));
-                if (collapsingToolbarLayout != null) {
-                    collapsingToolbarLayout.setStatusBarScrimColor(Color.parseColor("#ffff00"));
-                    collapsingToolbarLayout.setContentScrimColor(Color.parseColor("#ffff00"));
-                }
-                if (appBarLayout != null)
-                    appBarLayout.setBackgroundColor(Color.parseColor("#ffff00"));
-                if (tabLayout != null)
-                    tabLayout.setBackgroundColor(Color.parseColor("#ffff00"));
-                getWindow().setNavigationBarColor(Color.parseColor("#ffff00"));
-            } else if (kenBurnsView != null) {
-                Glide.with(getApplicationContext()).load(byteArray)
-                        .apply(centerCropTransform()).into(kenBurnsView);
-            }
-        }
-
-        @Override
-        protected String doInBackground(String... sUrl) {
-            kenBurnsView = findViewById(R.id.kenburnsView);
-            if (heroImageBitmap != null) {
-                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                heroImageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                byteArray = stream.toByteArray();
-            }
-            return null;
-        }
-    }
-
-    private class AppShortcutCreator extends AsyncTask<String, Integer, String> {
-
-        @Override
-        protected void onPostExecute(String result) {
-            prefs.edit().putString("app_shortcut_theme", theme_pid).apply();
-            favorite.setIcon(getDrawable(R.drawable.toolbar_favorite));
-            if (shouldDarken) favorite.getIcon().setColorFilter(
-                    getColor(R.color.information_activity_dark_icon_mode),
-                    PorterDuff.Mode.SRC_ATOP);
-            String format = String.format(getString(R.string.menu_favorite_snackbar), result);
-            currentShownLunchBar = Lunchbar.make(getView(),
-                    format,
-                    Lunchbar.LENGTH_LONG);
-            currentShownLunchBar.show();
-        }
-
-        @Override
-        protected String doInBackground(String... sUrl) {
-            References.createShortcut(getApplicationContext(), theme_pid, theme_name);
-            return theme_name;
-        }
-    }
-
-    private class AppShortcutClearer extends AsyncTask<String, Integer, String> {
-
-        @Override
-        protected void onPostExecute(String result) {
-            prefs.edit().remove("app_shortcut_theme").apply();
-            favorite.setIcon(getDrawable(R.drawable.toolbar_not_favorite));
-            if (shouldDarken) favorite.getIcon().setColorFilter(
-                    getColor(R.color.information_activity_dark_icon_mode),
-                    PorterDuff.Mode.SRC_ATOP);
-            String format = String.format(
-                    getString(R.string.menu_favorite_snackbar_cleared),
-                    result);
-            currentShownLunchBar = Lunchbar.make(getView(),
-                    format,
-                    Lunchbar.LENGTH_LONG);
-            currentShownLunchBar.show();
-        }
-
-        @Override
-        protected String doInBackground(String... sUrl) {
-            References.clearShortcut(getApplicationContext());
-            return theme_name;
         }
     }
 

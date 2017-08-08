@@ -31,7 +31,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-import projekt.substratum.R;
+import org.omnirom.substratum.R;
 import projekt.substratum.common.References;
 
 public class VariantAdapter extends ArrayAdapter<VariantItem> {

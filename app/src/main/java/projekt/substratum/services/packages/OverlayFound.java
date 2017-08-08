@@ -39,7 +39,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import projekt.substratum.R;
+import org.omnirom.substratum.R;
 import projekt.substratum.common.References;
 import projekt.substratum.common.platform.ThemeManager;
 

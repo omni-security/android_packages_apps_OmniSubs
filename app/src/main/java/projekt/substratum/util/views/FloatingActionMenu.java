@@ -29,7 +29,7 @@ import android.view.animation.ScaleAnimation;
 
 import com.gordonwong.materialsheetfab.AnimatedFab;
 
-import projekt.substratum.R;
+import org.omnirom.substratum.R;
 
 public class FloatingActionMenu extends FloatingActionButton implements AnimatedFab {
 

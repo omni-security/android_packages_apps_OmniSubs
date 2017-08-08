@@ -27,6 +27,8 @@ import android.content.Intent;
 import android.media.AudioAttributes;
 import android.util.Log;
 
+import org.omnirom.substratum.R;
+
 import projekt.substratum.common.References;
 import projekt.substratum.services.binder.BinderService;
 

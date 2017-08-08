@@ -16,33 +16,26 @@
  * along with Substratum.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package projekt.substratum.adapters.tabs.sounds;
+package org.omnirom.substratum;
 
-import android.content.Context;
+import android.app.Activity;
+import android.os.Bundle;
 
-public class SoundsInfo {
-    private String title, absolute_path;
-    private Context mContext;
+import projekt.substratum.common.References;
 
-    public SoundsInfo(Context mContext, String title, String absolute_path) {
-        this.mContext = mContext;
-        this.title = title;
-        this.absolute_path = absolute_path;
-    }
+public class OmniThemeActivity extends Activity {
 
-    public String getAbsolutePath() {
-        return absolute_path;
-    }
+    /**
+     * Controlled activity for ROM cherry-picked Settings/QS tile shortcuts
+     */
 
-    public Context getContext() {
-        return mContext;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String name) {
-        this.title = name;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        References.launchTheme(this,
+                "org.omnirom.daynight",
+                References.overlaysFragment
+        );
+        this.finish();
     }
 }

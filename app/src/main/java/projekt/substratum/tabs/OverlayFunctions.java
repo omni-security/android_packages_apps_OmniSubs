@@ -31,14 +31,12 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.design.widget.Lunchbar;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
@@ -55,17 +53,15 @@ import java.util.ArrayList;
 import eightbitlab.com.blurview.BlurView;
 import eightbitlab.com.blurview.RenderScriptBlur;
 import projekt.substratum.InformationActivity;
-import projekt.substratum.R;
+import org.omnirom.substratum.R;
 import projekt.substratum.adapters.tabs.overlays.OverlaysAdapter;
 import projekt.substratum.adapters.tabs.overlays.OverlaysItem;
 import projekt.substratum.common.References;
 import projekt.substratum.common.commands.ElevatedCommands;
 import projekt.substratum.common.commands.FileOperations;
 import projekt.substratum.common.platform.ThemeManager;
-import projekt.substratum.services.notification.NotificationButtonReceiver;
 import projekt.substratum.util.compilers.CacheCreator;
 import projekt.substratum.util.compilers.SubstratumBuilder;
-import projekt.substratum.util.files.Root;
 
 import static projekt.substratum.InformationActivity.currentShownLunchBar;
 import static projekt.substratum.common.References.DEFAULT_NOTIFICATION_CHANNEL_ID;
@@ -95,12 +91,6 @@ class OverlayFunctions {
             if (!fragment.enable_mode && !fragment.disable_mode) {
                 int notification_priority = Notification.PRIORITY_MAX;
 
-                // Create an Intent for the BroadcastReceiver
-                Intent buttonIntent = new Intent(context, NotificationButtonReceiver.class);
-
-                // Create the PendingIntent
-                PendingIntent btPendingIntent = PendingIntent.getBroadcast(
-                        context, 0, buttonIntent, 0);
                 PendingIntent resultPendingIntent = PendingIntent.getActivity(
                         context, 0, new Intent(), 0);
 
@@ -113,8 +103,6 @@ class OverlayFunctions {
                 fragment.mBuilder.setContentTitle(
                         context.getString(R.string.notification_initial_title))
                         .setProgress(100, 0, true)
-                        .addAction(android.R.color.transparent, context.getString(R.string
-                                .notification_hide), btPendingIntent)
                         .setSmallIcon(android.R.drawable.ic_popup_sync)
                         .setPriority(notification_priority)
                         .setContentIntent(resultPendingIntent)
@@ -307,30 +295,7 @@ class OverlayFunctions {
             } else if (fragment.disable_mode) {
                 new Phase4_finishDisableFunction(fragment).execute();
             }
-            if (References.isSamsung(context) &&
-                    fragment.late_install != null &&
-                    fragment.late_install.size() > 0) {
-                if (Root.checkRootAccess() && Root.requestRootAccess()) {
-                    fragment.progressBar.setVisibility(View.VISIBLE);
-                    fragment.overlaysWaiting = fragment.late_install.size();
-                    for (int i = 0; i < fragment.late_install.size(); i++) {
-                        ThemeManager.installOverlay(
-                                fragment.getContext(),
-                                fragment.late_install.get(i));
-                    }
-                } else {
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    Uri uri = FileProvider.getUriForFile(
-                            context,
-                            context.getApplicationContext().getPackageName() + ".provider",
-                            new File(fragment.late_install.get(0)));
-                    intent.setDataAndType(
-                            uri,
-                            "application/vnd.android.package-archive");
-                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    fragment.startActivityForResult(intent, 2486);
-                }
-            } else if (!References.checkOMS(context) &&
+            if (!References.checkOMS(context) &&
                     fragment.final_runner.size() == fragment.fail_count) {
                 final AlertDialog.Builder alertDialogBuilder =
                         new AlertDialog.Builder(context);
@@ -1184,7 +1149,7 @@ class OverlayFunctions {
                     }, REFRESH_WINDOW_DELAY);
                 }
 
-                if (!fragment.late_install.isEmpty() && !References.isSamsung(context)) {
+                if (!fragment.late_install.isEmpty()) {
                     // Install remaining overlays
                     ThemeManager.installOverlay(context, fragment.late_install);
                 }

@@ -35,15 +35,11 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.pm.ShortcutInfo;
-import android.content.pm.ShortcutManager;
 import android.content.pm.Signature;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.Icon;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -59,15 +55,14 @@ import android.util.Log;
 import android.widget.Toast;
 
 import org.apache.commons.io.IOUtils;
+import org.omnirom.substratum.R;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -78,16 +73,11 @@ import java.net.URL;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -101,27 +91,17 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.x500.X500Principal;
 
-import projekt.substratum.R;
-import projekt.substratum.activities.launch.AppShortcutLaunch;
 import projekt.substratum.activities.launch.ThemeLaunchActivity;
-import projekt.substratum.common.analytics.FirebaseAnalytics;
-import projekt.substratum.common.analytics.PackageAnalytics;
 import projekt.substratum.common.commands.ElevatedCommands;
 import projekt.substratum.common.platform.ThemeInterfacerService;
-import projekt.substratum.common.tabs.SoundManager;
-import projekt.substratum.services.crash.AppCrashReceiver;
 import projekt.substratum.services.packages.OverlayFound;
 import projekt.substratum.services.packages.OverlayUpdater;
 import projekt.substratum.services.packages.PackageModificationDetector;
-import projekt.substratum.services.profiles.ScheduledProfileReceiver;
 import projekt.substratum.services.system.InterfacerAuthorizationReceiver;
 import projekt.substratum.util.compilers.CacheCreator;
-import projekt.substratum.util.files.Root;
 import projekt.substratum.util.injectors.AOPTCheck;
 import projekt.substratum.util.readers.ReadSupportedROMsFile;
 import projekt.substratum.util.readers.ReadVariantPrioritizedColor;
-
-import static projekt.substratum.common.analytics.PackageAnalytics.PACKAGE_TAG;
 
 public class References {
 
@@ -133,7 +113,6 @@ public class References {
     public static final Boolean BYPASS_ALL_VERSION_CHECKS = false; // For developer previews only!
     public static final Boolean BYPASS_SUBSTRATUM_BUILDER_DELETION = false; // Do not delete cache?
     @SuppressWarnings("WeakerAccess")
-    public static final Boolean FORCE_SAMSUNG_VARIANT = false; // Debugging on a non-Samsung device
     // These are specific log tags for different classes
     public static final String SUBSTRATUM_BUILDER = "SubstratumBuilder";
     public static final String SUBSTRATUM_LOG = "SubstratumLogger";
@@ -144,7 +123,6 @@ public class References {
     public static final String INTERFACER_SERVICE = INTERFACER_PACKAGE + ".services.JobService";
     // Samsung package names
     public static final String SST_ADDON_PACKAGE = "projekt.sungstratum";
-    public static final String PLAY_STORE_PACKAGE_NAME = "com.android.vending";
     // Specific intent for receiving completion status on backend
     public static final String INTERFACER_BINDED = INTERFACER_PACKAGE + ".INITIALIZE";
     public static final String STATUS_CHANGED = INTERFACER_PACKAGE + ".STATUS_CHANGED";
@@ -248,8 +226,6 @@ public class References {
     // These values control the dynamic certification of substratum
     private static Boolean uncertified = null;
     private static int hashValue;
-    // Localized variables shared amongst common resources
-    private static ScheduledProfileReceiver scheduledProfileReceiver;
 
     public static String checkFirmwareSupport(Context context, String urls, String inputFileName) {
         String supported_rom = "";
@@ -363,13 +339,10 @@ public class References {
 
     public static void registerBroadcastReceivers(Context context) {
         try {
-            IntentFilter intentAppCrashed = new IntentFilter(APP_CRASHED);
             IntentFilter intentPackageAdded = new IntentFilter(PACKAGE_ADDED);
             intentPackageAdded.addDataScheme("package");
             IntentFilter intentPackageFullyRemoved = new IntentFilter(PACKAGE_FULLY_REMOVED);
             intentPackageFullyRemoved.addDataScheme("package");
-            context.getApplicationContext().registerReceiver(
-                    new AppCrashReceiver(), intentAppCrashed);
             context.getApplicationContext().registerReceiver(
                     new OverlayFound(), intentPackageAdded);
             context.getApplicationContext().registerReceiver(
@@ -392,86 +365,12 @@ public class References {
         }
     }
 
-    public static void registerProfileScreenOffReceiver(Context context) {
-        scheduledProfileReceiver = new ScheduledProfileReceiver();
-        context.registerReceiver(scheduledProfileReceiver,
-                new IntentFilter(Intent.ACTION_SCREEN_OFF));
-    }
-
-    public static void unregisterProfileScreenOffReceiver(Context context) {
-        try {
-            context.unregisterReceiver(scheduledProfileReceiver);
-        } catch (Exception e) {
-            // Suppress warning
-        }
-    }
 
     public static boolean isCachingEnabled(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context)
                 .getBoolean("caching_enabled", false);
     }
 
-    public static void createShortcut(Context context, String theme_pid, String theme_name) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-            ShortcutManager shortcutManager = context.getSystemService(ShortcutManager.class);
-            Bitmap app_icon = ((BitmapDrawable)
-                    grabAppIcon(context, theme_pid)).getBitmap();
-            try {
-                Intent myIntent = new Intent(Intent.ACTION_MAIN);
-                myIntent.putExtra("theme_name", theme_name);
-                myIntent.putExtra("theme_pid", theme_pid);
-                myIntent.setComponent(
-                        ComponentName.unflattenFromString(
-                                context.getPackageName() +
-                                        "/" + AppShortcutLaunch.class.getName()));
-                myIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-
-                ShortcutInfo shortcut =
-                        new ShortcutInfo.Builder(context, "favorite")
-                                .setShortLabel(theme_name)
-                                .setLongLabel(theme_name)
-                                .setIcon(Icon.createWithBitmap(app_icon))
-                                .setIntent(myIntent)
-                                .build();
-                if (shortcutManager != null) {
-                    shortcutManager.setDynamicShortcuts(Collections.singletonList(shortcut));
-                }
-                Log.d(SUBSTRATUM_LOG, "Successfully added dynamic app shortcut!");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public static void clearShortcut(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-            ShortcutManager shortcutManager = context.getSystemService(ShortcutManager.class);
-            if (shortcutManager != null) {
-                shortcutManager.removeAllDynamicShortcuts();
-            }
-            Log.d(SUBSTRATUM_LOG, "Successfully removed all dynamic app shortcuts!");
-        }
-    }
-
-    public static String checkXposedVersion() {
-        String xposed_version = "";
-        File f = new File("/system/framework/XposedBridge.jar");
-        if (f.isFile()) {
-            File file = new File("/system/", "xposed.prop");
-            try {
-                BufferedReader br = new BufferedReader(new FileReader(file));
-                String unparsed_br = br.readLine();
-                xposed_version = unparsed_br.substring(8, 10);
-            } catch (FileNotFoundException e) {
-                Log.e("XposedChecker", "'xposed.prop' could not be found!");
-            } catch (IOException e) {
-                Log.e("XposedChecker", "Unable to parse BufferedReader from 'xposed.prop'");
-            }
-            xposed_version = ", " + R.string.logcat_email_xposed_check + " (" +
-                    xposed_version + ")";
-        }
-        return xposed_version;
-    }
 
     public static int getDeviceEncryptionStatus(Context context) {
         // 0: ENCRYPTION_STATUS_UNSUPPORTED
@@ -543,7 +442,6 @@ public class References {
 
     // This method is used to determine whether there the system is initiated with OMS
     public static Boolean checkOMS(@NonNull Context context) {
-        if (FORCE_SAMSUNG_VARIANT) return false;
         //noinspection ConstantConditions
         if (context == null) return true; // Safe to assume that window refreshes only on OMS
         if (!BYPASS_ALL_VERSION_CHECKS) {
@@ -562,18 +460,10 @@ public class References {
         prefs.edit().remove("oms_state").apply();
         try {
             boolean foundOms = false;
-            if (!isSamsungDevice(context)) {
-                if (checkThemeInterfacer(context)) {
-                    foundOms = true;
-                } else {
-                    String out = Root.runCommand("cmd overlay").split("\n")[0];
-                    if (out.equals("The overlay manager has already been initialized.") ||
-                            out.equals("Overlay manager (overlay) commands:")) {
-                        foundOms = true;
-                    }
-                }
+            if (checkThemeInterfacer(context)) {
+                foundOms = true;
             }
-            if (foundOms && !isSamsungDevice(context)) {
+            if (foundOms ) {
                 prefs.edit().putBoolean("oms_state", true).apply();
                 prefs.edit().putInt("oms_version", 7).apply();
                 Log.d(SUBSTRATUM_LOG, "Initializing Substratum with the seventh " +
@@ -740,7 +630,6 @@ public class References {
 
     // This method checks whether fonts is supported by the system
     public static boolean isFontsSupported() {
-        if (FORCE_SAMSUNG_VARIANT) return false;
         try {
             Class<?> cls = Class.forName("android.graphics.Typeface");
             cls.getDeclaredMethod("getSystemFontDirLocation");
@@ -755,11 +644,6 @@ public class References {
     }
 
     // This string array contains all the SystemUI acceptable overlay packs
-    public static Boolean allowedSounds(String current) {
-        return Arrays.asList(SoundManager.ALLOWED_SOUNDS).contains(current);
-    }
-
-    // This string array contains all the SystemUI acceptable overlay packs
     public static Boolean allowedSystemUIOverlay(String current) {
         return Arrays.asList(Resources.ALLOWED_SYSTEMUI_ELEMENTS).contains(current);
     }
@@ -767,16 +651,6 @@ public class References {
     // This string array contains all the Settings acceptable overlay packs
     public static Boolean allowedSettingsOverlay(String current) {
         return Arrays.asList(Resources.ALLOWED_SETTINGS_ELEMENTS).contains(current);
-    }
-
-    // This string array contains all the SystemUI acceptable sound files
-    public static Boolean allowedUISound(String targetValue) {
-        return Arrays.asList(Resources.ALLOWED_UI_THEMABLE_SOUNDS).contains(targetValue);
-    }
-
-    // This string array contains all the legacy allowed folders
-    public static Boolean allowedForLegacy(String targetValue) {
-        return Arrays.asList(Resources.ALLOWED_LEGACY_ASSETS).contains(targetValue);
     }
 
     // This string array contains all blacklisted app for theme
@@ -1428,65 +1302,6 @@ public class References {
         return 0;
     }
 
-    static Boolean spreadYourWingsAndFly(Context context) {
-        if (uncertified != null) {
-            return uncertified;
-        }
-        SharedPreferences prefs = context
-                .getSharedPreferences(FirebaseAnalytics.PACKAGES_PREFS, Context.MODE_PRIVATE);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("ddMMyyyy", Locale.US);
-        String date = dateFormat.format(new Date());
-
-        if (prefs.contains(date)) {
-            Set<String> pref = prefs.getStringSet(date, new HashSet<>());
-            for (String check : pref) {
-                if (isPackageInstalled(context, check, false)) {
-                    Log.d("PatcherDatabase",
-                            "The database has triggered a primary level blacklist package.");
-                    uncertified = true;
-                    return true;
-                } else if (getMetaData(context, check) || getProviders(context, check) ||
-                        getIntents(context, check)) {
-                    Log.d("PatcherDatabase",
-                            "The database has triggered a secondary level blacklist package.");
-                    uncertified = true;
-                    return true;
-                }
-            }
-        }
-        if (checkPackageSupport(context)) {
-            uncertified = true;
-            return true;
-        }
-        uncertified = false;
-        return false;
-    }
-
-    // Check for the denied packages if existing on the device
-    private static boolean checkPackageSupport(Context context) {
-        boolean blacklistedPackageFound = false;
-        String[] blacklistedPackages = new String[]{
-                "com.android.vending.billing.InAppBillingService.",
-                "com.android.vending.billing.InAppBillingService.LOCK",
-                "com.android.vending.billing.InAppBillingService.LACK",
-                "uret.jasi2169.",
-                "uret.jasi2169.patcher",
-                "com.dimonvideo.luckypatcher",
-                "com.chelpus.lackypatch",
-                "com.forpda.lp",
-                "com.android.vending.billing.InAppBillingService.LUCK",
-                "zone.jasi2169.uretpatcher",
-                "zone.jasi2169."
-        };
-        for (String packageName : blacklistedPackages) {
-            if (isPackageInstalled(context, packageName, false)) {
-                blacklistedPackageFound = true;
-                break;
-            }
-        }
-        return blacklistedPackageFound;
-    }
-
     // Check if notification is visible for the user
     public static boolean isNotificationVisible(Context mContext, int notification_id) {
         NotificationManager mNotificationManager = (NotificationManager)
@@ -1599,7 +1414,7 @@ public class References {
                     Intent.FLAG_ACTIVITY_SINGLE_TOP);
         }
         originalIntent.putExtra("hash_passthrough", hashPassthrough(mContext));
-        originalIntent.putExtra("certified", !spreadYourWingsAndFly(mContext));
+        originalIntent.putExtra("certified", true);
         try {
             PackageManager pm = mContext.getPackageManager();
             PackageInfo info = pm.getPackageInfo(currentTheme, PackageManager.GET_ACTIVITIES);
@@ -1670,7 +1485,7 @@ public class References {
                                      String package_name,
                                      String theme_mode,
                                      String actionIntent) {
-        boolean should_debug = projekt.substratum.BuildConfig.DEBUG;
+        boolean should_debug = org.omnirom.substratum.BuildConfig.DEBUG;
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
         if (should_debug) Log.d("ThemeLauncher", "Creating new intent...");
         Intent intentActivity;
@@ -1711,47 +1526,6 @@ public class References {
     public static boolean isBinderInterfacer(Context context) {
         PackageInfo packageInfo = getThemeInterfacerPackage(context);
         return packageInfo != null && packageInfo.versionCode >= 60;
-    }
-
-    // Check if the system is of the Samsung variant
-    public static boolean isSamsung(Context context) {
-        if (FORCE_SAMSUNG_VARIANT) return true;
-        boolean isTouchWiz = isSamsungDevice(context);
-        if (!isTouchWiz) return false;
-
-        SharedPreferences prefs =
-                context.getSharedPreferences("substratum_state", Context.MODE_PRIVATE);
-
-        boolean debuggingValue = prefs.getBoolean("sungstratum_debug", true);
-        boolean hashBoolValue = prefs.getBoolean("sungstratum_hash", false);
-        boolean evaluatedResponse = prefs.getBoolean("sungstratum", false);
-        boolean installer = prefs.getBoolean("sungstratum_installer", false);
-        String fingerprint = prefs.getString("sungstratum_fp", "0");
-        String expFingerprint = prefs.getString("sungstratum_exp_fp", "o");
-        String liveInstaller = PackageAnalytics.getPackageInstaller(context, SST_ADDON_PACKAGE);
-        boolean liveInstallerValidity = liveInstaller != null &&
-                liveInstaller.equals(PLAY_STORE_PACKAGE_NAME);
-
-        boolean sungstratumPresent = !debuggingValue;
-        sungstratumPresent &= !hashBoolValue;
-        sungstratumPresent &= evaluatedResponse;
-        sungstratumPresent &= installer;
-        sungstratumPresent &= fingerprint.equals(expFingerprint);
-        sungstratumPresent &= liveInstallerValidity;
-        return sungstratumPresent;
-    }
-
-    // Check if the system is of the Samsung variant
-    public static boolean isSamsungDevice(Context context) {
-        if (FORCE_SAMSUNG_VARIANT) return true;
-        List<String> listOfFeatures =
-                Arrays.asList(context.getPackageManager().getSystemSharedLibraryNames());
-        return listOfFeatures.contains("touchwiz");
-    }
-
-    // Check if theme is Samsung supported
-    public static boolean isSamsungTheme(Context context, String package_name) {
-        return getOverlayMetadata(context, package_name, metadataSamsungSupport, false);
     }
 
     // Obtain a live sample of the metadata in an app
@@ -1810,22 +1584,6 @@ public class References {
             // Theme Interfacer was not installed
         }
         return null;
-    }
-
-    public static boolean isIncompatibleFirmware() {
-        String currentPatch = getProp("ro.build.version.security_patch");
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
-        try {
-            Date date = format.parse(currentPatch);
-            long currentPatchTimestamp = date.getTime();
-            return currentPatchTimestamp > NOVEMBER_PATCH_TIMESTAMP &&
-                    currentPatchTimestamp < JANUARY_PATCH_TIMESTAMP;
-        } catch (ParseException pe) {
-            // Suppress warning for ROMs that erase this prop
-        }
-
-        // Something bad happened. Aborting
-        return false;
     }
 
     public static boolean needsRecreate(Context context, ArrayList<String> list) {
@@ -1892,10 +1650,6 @@ public class References {
                                 String[] data = {appInfo.metaData.getString
                                         (metadataAuthor), package_name};
                                 packages.put(appInfo.metaData.getString(metadataName), data);
-                                Log.d(PACKAGE_TAG,
-                                        "Loaded Substratum Theme: [" + package_name + "]");
-                                if (References.ENABLE_PACKAGE_LOGGING)
-                                    PackageAnalytics.logPackageInfo(context, package_name);
                             } else {
                                 try {
                                     String[] stringArray = am.list("");
@@ -1956,10 +1710,6 @@ public class References {
                                 String[] data = {appInfo.metaData.getString
                                         (metadataAuthor), packageName};
                                 packages.put(appInfo.metaData.getString(metadataName), data);
-                                Log.d(PACKAGE_TAG,
-                                        "Loaded Substratum Theme: [" + packageName + "]");
-                                if (References.ENABLE_PACKAGE_LOGGING)
-                                    PackageAnalytics.logPackageInfo(context, packageName);
                             } else {
                                 try {
                                     String[] stringArray = am.list("");
@@ -2091,30 +1841,6 @@ public class References {
             bufferedWriter.close();
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    public static class Markdown extends AsyncTask<Void, Void, Void> {
-        @SuppressLint("StaticFieldLeak")
-        private Context context;
-        private SharedPreferences prefs;
-
-        public Markdown(Context context, SharedPreferences prefs) {
-            this.context = context;
-            this.prefs = prefs;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
-        }
-
-        @Override
-        protected Void doInBackground(Void... sUrl) {
-            prefs.edit().putBoolean("complexion",
-                    !References.spreadYourWingsAndFly(context) &&
-                            References.hashPassthrough(context) != 0).apply();
-            return null;
         }
     }
 
