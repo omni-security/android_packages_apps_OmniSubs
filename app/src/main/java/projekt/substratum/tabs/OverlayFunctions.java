@@ -28,9 +28,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
 import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
@@ -40,20 +38,15 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.TextView;
 
-import org.zeroturnaround.zip.commons.FileUtils;
+import org.omnirom.substratum.R;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
-import eightbitlab.com.blurview.BlurView;
-import eightbitlab.com.blurview.RenderScriptBlur;
 import projekt.substratum.InformationActivity;
-import org.omnirom.substratum.R;
 import projekt.substratum.adapters.tabs.overlays.OverlaysAdapter;
 import projekt.substratum.adapters.tabs.overlays.OverlaysItem;
 import projekt.substratum.common.References;
@@ -62,6 +55,7 @@ import projekt.substratum.common.commands.FileOperations;
 import projekt.substratum.common.platform.ThemeManager;
 import projekt.substratum.util.compilers.CacheCreator;
 import projekt.substratum.util.compilers.SubstratumBuilder;
+import projekt.substratum.util.files.FileUtils;
 
 import static projekt.substratum.InformationActivity.currentShownLunchBar;
 import static projekt.substratum.common.References.DEFAULT_NOTIFICATION_CHANNEL_ID;
@@ -110,38 +104,16 @@ class OverlayFunctions {
                 fragment.mNotifyManager.notify(fragment.id, fragment.mBuilder.build());
 
                 fragment.mProgressDialog = null;
-                fragment.mProgressDialog = new ProgressDialog(context,
-                        R.style.SubstratumBuilder_ActivityTheme);
-                fragment.mProgressDialog.setIndeterminate(false);
+                fragment.mProgressDialog = new ProgressDialog(context);
+                fragment.mProgressDialog.setIndeterminate(true);
                 fragment.mProgressDialog.setCancelable(false);
                 fragment.mProgressDialog.show();
-                fragment.mProgressDialog.setContentView(R.layout.compile_dialog_loader);
                 if (fragment.mProgressDialog.getWindow() != null) {
                     fragment.mProgressDialog.getWindow().addFlags(
                             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 }
 
-                final float radius = 5;
-                final View decorView = fragment.getActivity().getWindow().getDecorView();
-                final ViewGroup rootView = decorView.findViewById(android.R.id.content);
-                final Drawable windowBackground = decorView.getBackground();
-
-                BlurView blurView = fragment.mProgressDialog.findViewById(R.id.blurView);
-
-                if (rootView != null) {
-                    blurView.setupWith(rootView)
-                            .windowBackground(windowBackground)
-                            .blurAlgorithm(new RenderScriptBlur(context))
-                            .blurRadius(radius);
-                }
-
-                fragment.dialogProgress = fragment.mProgressDialog.findViewById(R.id.loading_bar);
-                fragment.dialogProgress.setProgressTintList(ColorStateList.valueOf(context.getColor(
-                        R.color.compile_dialog_wave_color)));
-                fragment.dialogProgress.setIndeterminate(false);
-
-                fragment.loader_string = fragment.mProgressDialog.findViewById(R.id.title);
-                fragment.loader_string.setText(context.getResources().getString(
+                fragment.mProgressDialog.setMessage(context.getResources().getString(
                         R.string.sb_phase_1_loader));
             }
             super.onPreExecute();
@@ -228,7 +200,7 @@ class OverlayFunctions {
                             .setProgress(100, 0, false);
                     fragment.mNotifyManager.notify(fragment.id, fragment.mBuilder.build());
                 }
-                fragment.loader_string.setText(context.getResources().getString(
+                fragment.mProgressDialog.setMessage(context.getResources().getString(
                         R.string.sb_phase_2_loader));
             } else {
                 fragment.progressBar.setVisibility(View.VISIBLE);
@@ -240,10 +212,7 @@ class OverlayFunctions {
         protected void onProgressUpdate(Integer... values) {
             super.onProgressUpdate(values);
             Overlays fragment = ref.get();
-            TextView textView = fragment.mProgressDialog.findViewById(R.id.current_object);
-            textView.setText(fragment.current_dialog_overlay);
-            double progress = (fragment.current_amount / fragment.total_amount) * 100;
-            fragment.dialogProgress.setProgress((int) progress, true);
+            fragment.mProgressDialog.setMessage(fragment.current_dialog_overlay);
         }
 
         @SuppressWarnings("ConstantConditions")

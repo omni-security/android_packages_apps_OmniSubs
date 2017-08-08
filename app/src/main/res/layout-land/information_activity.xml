@@ -23,42 +23,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/theme_information_background"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="true"
+    tools:context=".OmniThemeActivity">
 
-    <android.support.design.widget.TabLayout
-        android:id="@+id/tabs"
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:background="?attr/colorPrimary"
-        app:layout_anchor="@+id/appbar"
-        app:layout_anchorGravity="bottom"
-        app:tabGravity="fill"
-        app:tabMode="scrollable"
-        app:tabSelectedTextColor="@android:color/white"
-        app:tabTextColor="@android:color/white"/>
+        android:background="?attr/colorPrimary"/>
 
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/appbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
-        android:theme="@style/AppTheme.AppBarOverlay"
-        app:elevation="0dp">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
-
-    </android.support.design.widget.AppBarLayout>
-
-    <android.support.v4.view.ViewPager
-        android:id="@+id/viewpager"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="?actionBarSize"/>
+        android:layout_marginTop="?attr/actionBarSize" >
+
+        <fragment class="projekt.substratum.tabs.Overlays"
+                  android:id="@+id/overlays"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent" />
+    </LinearLayout>
 
     <projekt.substratum.util.views.FloatingActionMenu
         android:id="@+id/apply_fab"

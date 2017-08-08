@@ -20,9 +20,10 @@ package projekt.substratum;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.Lunchbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
@@ -40,18 +41,22 @@ public class TeamActivity extends SubstratumActivity {
         setContentView(R.layout.team_activity);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
-        if (toolbar != null) toolbar.setTitle(R.string.nav_team_contributors);
+        if (toolbar != null) {
+            toolbar.setTitle(R.string.nav_team_contributors);
+            toolbar.setTitleTextColor(getColor(R.color.information_activity_light_icon_mode));
+        }
 
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setDisplayShowHomeEnabled(true);
-        }
-        if (toolbar != null) toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
-        AppBarLayout appBarLayout = findViewById(R.id.appbar);
-        appBarLayout.setExpanded(false, false);
-        appBarLayout.setActivated(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        Drawable upArrow = getDrawable(R.drawable.information_activity_back_light);
+        if (upArrow != null)
+            upArrow.setColorFilter(getColor(R.color.information_activity_light_icon_mode),
+                    PorterDuff.Mode.SRC_ATOP);
+        getSupportActionBar().setHomeAsUpIndicator(upArrow);
+
+        if (toolbar != null) toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         CardView nicholas_card = findViewById(R.id.nicholas_card);
         nicholas_card.setOnClickListener(v -> {
@@ -61,10 +66,10 @@ public class TeamActivity extends SubstratumActivity {
                 i.setData(Uri.parse(playURL));
                 startActivity(i);
             } catch (ActivityNotFoundException activityNotFoundException) {
-                    Lunchbar.make(findViewById(android.R.id.content),
-                            getString(R.string.activity_missing_toast),
-                            Lunchbar.LENGTH_LONG)
-                            .show();
+                Lunchbar.make(findViewById(android.R.id.content),
+                        getString(R.string.activity_missing_toast),
+                        Lunchbar.LENGTH_LONG)
+                        .show();
             }
         });
 
@@ -76,10 +81,10 @@ public class TeamActivity extends SubstratumActivity {
                 i.setData(Uri.parse(playURL));
                 startActivity(i);
             } catch (ActivityNotFoundException activityNotFoundException) {
-                    Lunchbar.make(findViewById(android.R.id.content),
-                            getString(R.string.activity_missing_toast),
-                            Lunchbar.LENGTH_LONG)
-                            .show();
+                Lunchbar.make(findViewById(android.R.id.content),
+                        getString(R.string.activity_missing_toast),
+                        Lunchbar.LENGTH_LONG)
+                        .show();
             }
         });
 
@@ -91,10 +96,10 @@ public class TeamActivity extends SubstratumActivity {
                 i.setData(Uri.parse(playURL));
                 startActivity(i);
             } catch (ActivityNotFoundException activityNotFoundException) {
-                    Lunchbar.make(findViewById(android.R.id.content),
-                            getString(R.string.activity_missing_toast),
-                            Lunchbar.LENGTH_LONG)
-                            .show();
+                Lunchbar.make(findViewById(android.R.id.content),
+                        getString(R.string.activity_missing_toast),
+                        Lunchbar.LENGTH_LONG)
+                        .show();
             }
         });
 
@@ -105,10 +110,10 @@ public class TeamActivity extends SubstratumActivity {
                 Intent i = new Intent(Intent.ACTION_VIEW);
                 i.setData(Uri.parse(playURL));
                 startActivity(i);
-                    Lunchbar.make(findViewById(android.R.id.content),
-                            getString(R.string.activity_missing_toast),
-                            Lunchbar.LENGTH_LONG)
-                            .show();
+                Lunchbar.make(findViewById(android.R.id.content),
+                        getString(R.string.activity_missing_toast),
+                        Lunchbar.LENGTH_LONG)
+                        .show();
             } catch (ActivityNotFoundException activityNotFoundException) {
                 Lunchbar.make(findViewById(android.R.id.content),
                         getString(R.string.activity_missing_toast),
@@ -125,10 +130,10 @@ public class TeamActivity extends SubstratumActivity {
                 i.setData(Uri.parse(playURL));
                 startActivity(i);
             } catch (ActivityNotFoundException activityNotFoundException) {
-                    Lunchbar.make(findViewById(android.R.id.content),
-                            getString(R.string.activity_missing_toast),
-                            Lunchbar.LENGTH_LONG)
-                            .show();
+                Lunchbar.make(findViewById(android.R.id.content),
+                        getString(R.string.activity_missing_toast),
+                        Lunchbar.LENGTH_LONG)
+                        .show();
             }
         });
 
@@ -140,10 +145,10 @@ public class TeamActivity extends SubstratumActivity {
                 i.setData(Uri.parse(playURL));
                 startActivity(i);
             } catch (ActivityNotFoundException activityNotFoundException) {
-                    Lunchbar.make(findViewById(android.R.id.content),
-                            getString(R.string.activity_missing_toast),
-                            Lunchbar.LENGTH_LONG)
-                            .show();
+                Lunchbar.make(findViewById(android.R.id.content),
+                        getString(R.string.activity_missing_toast),
+                        Lunchbar.LENGTH_LONG)
+                        .show();
             }
         });
 
@@ -155,10 +160,10 @@ public class TeamActivity extends SubstratumActivity {
                 i.setData(Uri.parse(playURL));
                 startActivity(i);
             } catch (ActivityNotFoundException activityNotFoundException) {
-                    Lunchbar.make(findViewById(android.R.id.content),
-                            getString(R.string.activity_missing_toast),
-                            Lunchbar.LENGTH_LONG)
-                            .show();
+                Lunchbar.make(findViewById(android.R.id.content),
+                        getString(R.string.activity_missing_toast),
+                        Lunchbar.LENGTH_LONG)
+                        .show();
             }
         });
 
@@ -180,10 +185,10 @@ public class TeamActivity extends SubstratumActivity {
                 i.setData(Uri.parse(playURL));
                 startActivity(i);
             } catch (ActivityNotFoundException activityNotFoundException) {
-                    Lunchbar.make(findViewById(android.R.id.content),
-                            getString(R.string.activity_missing_toast),
-                            Lunchbar.LENGTH_LONG)
-                            .show();
+                Lunchbar.make(findViewById(android.R.id.content),
+                        getString(R.string.activity_missing_toast),
+                        Lunchbar.LENGTH_LONG)
+                        .show();
             }
         });
 

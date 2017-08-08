@@ -18,6 +18,7 @@
 
 package projekt.substratum;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.NotificationManager;
@@ -29,7 +30,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -38,12 +38,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.Lunchbar;
-import android.support.design.widget.TabLayout;
+import android.support.v13.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.AppCompatImageView;
@@ -66,16 +64,15 @@ import org.omnirom.substratum.R;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import projekt.substratum.activities.base.SubstratumActivity;
-import projekt.substratum.adapters.tabs.InformationTabsAdapter;
 import projekt.substratum.common.References;
 import projekt.substratum.common.commands.ElevatedCommands;
 import projekt.substratum.common.commands.FileOperations;
 import projekt.substratum.common.platform.ThemeManager;
 import projekt.substratum.util.files.Root;
+import projekt.substratum.util.injectors.AOPTCheck;
 import projekt.substratum.util.views.FloatingActionMenu;
 
 import static android.content.om.OverlayInfo.STATE_APPROVED_DISABLED;
@@ -83,7 +80,6 @@ import static android.content.om.OverlayInfo.STATE_APPROVED_ENABLED;
 import static projekt.substratum.common.References.BYPASS_SUBSTRATUM_BUILDER_DELETION;
 import static projekt.substratum.common.References.MANAGER_REFRESH;
 import static projekt.substratum.common.References.metadataOverlayParent;
-import static projekt.substratum.common.References.overlaysFragment;
 
 public class InformationActivity extends SubstratumActivity {
 
@@ -98,13 +94,15 @@ public class InformationActivity extends SubstratumActivity {
     private Boolean uninstalled = false;
     private byte[] byteArray;
     private SharedPreferences prefs;
-    private AppBarLayout appBarLayout;
-    private TabLayout tabLayout;
     private ProgressDialog mProgressDialog;
     private MaterialSheetFab materialSheetFab;
     private int tabPosition;
     private LocalBroadcastManager localBroadcastManager;
     private BroadcastReceiver refreshReceiver;
+    private boolean mStoragePerms;
+    private FloatingActionMenu floatingActionButton;
+
+    private static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
     public static String getThemeName() {
         return theme_name;
@@ -187,15 +185,6 @@ public class InformationActivity extends SubstratumActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.information_activity);
-
-        prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-
-        // Register the theme install receiver to auto refresh the fragment
-        refreshReceiver = new RefreshReceiver();
-        IntentFilter if1 = new IntentFilter(MANAGER_REFRESH);
-        localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
-        localBroadcastManager.registerReceiver(refreshReceiver, if1);
 
         Intent currentIntent = getIntent();
         theme_name = currentIntent.getStringExtra("theme_name");
@@ -208,10 +197,21 @@ public class InformationActivity extends SubstratumActivity {
             theme_mode = "";
         }
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        if (toolbar != null) toolbar.setTitle(theme_name);
+        setContentView(R.layout.information_activity);
 
-        final ViewPager viewPager = findViewById(R.id.viewpager);
+        prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+        // Register the theme install receiver to auto refresh the fragment
+        refreshReceiver = new RefreshReceiver();
+        IntentFilter if1 = new IntentFilter(MANAGER_REFRESH);
+        localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
+        localBroadcastManager.registerReceiver(refreshReceiver, if1);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        if (toolbar != null) {
+            toolbar.setTitle(theme_name);
+            toolbar.setTitleTextColor(getColor(R.color.information_activity_light_icon_mode));
+        }
 
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -220,17 +220,12 @@ public class InformationActivity extends SubstratumActivity {
         }
         if (toolbar != null) toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
-        appBarLayout = findViewById(R.id.appbar);
-        appBarLayout.setExpanded(false, false);
-        appBarLayout.setActivated(false);
-
         View sheetView = findViewById(R.id.fab_sheet);
         View overlay = findViewById(R.id.overlay);
         int sheetColor = getApplicationContext().getColor(R.color.fab_menu_background_card);
         int fabColor = getApplicationContext().getColor(R.color.fab_background_color);
 
-        final FloatingActionMenu floatingActionButton = findViewById(R.id.apply_fab);
-        floatingActionButton.show();
+        floatingActionButton = findViewById(R.id.apply_fab);
 
         // Create material sheet FAB
         if (sheetView != null && overlay != null) {
@@ -242,198 +237,122 @@ public class InformationActivity extends SubstratumActivity {
                     fabColor);
         }
 
-        tabLayout = findViewById(R.id.tabs);
-        if (tabLayout != null) {
-            if (theme_mode.equals("")) {
-                try {
-                    Context otherContext = getApplicationContext().createPackageContext
-                            (theme_pid, 0);
-                    AssetManager am = otherContext.getAssets();
-                    List found_folders = Arrays.asList(am.list(""));
-                    tab_checker = Arrays.asList(am.list(""));
+        Drawable upArrow = getDrawable(R.drawable.information_activity_back_light);
+        if (upArrow != null)
+            upArrow.setColorFilter(getColor(R.color.information_activity_light_icon_mode),
+                    PorterDuff.Mode.SRC_ATOP);
+        getSupportActionBar().setHomeAsUpIndicator(upArrow);
+        setOverflowButtonColor(this, false);
 
-                    if (tab_checker.contains(overlaysFragment) ||
-                            tab_checker.contains("overlays_legacy")) {
-                        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string
-                                .theme_information_tab_one)));
-                    }
-                } catch (Exception e) {
-                    Log.e(References.SUBSTRATUM_LOG, "Could not refresh list of asset folders.");
-                }
-            } else {
-                switch (theme_mode) {
-                    case overlaysFragment:
-                        tabLayout.addTab(tabLayout.newTab().setText(
-                                getString(R.string.theme_information_tab_one)));
-                        break;
-                }
+        LocalBroadcastManager localBroadcastManager =
+                LocalBroadcastManager.getInstance(getApplicationContext());
+        floatingActionButton.setOnClickListener(v -> {
+            try {
+                boolean isLunchbarOpen = closeAllLunchBars();
+                final Handler handler = new Handler();
+                handler.postDelayed(() -> {
+                    materialSheetFab.showSheet();
+                }, isLunchbarOpen ? LUNCHBAR_DISMISS_FAB_CLICK_DELAY : 0);
+            } catch (NullPointerException npe) {
+                // Suppress warning
             }
+        });
 
-            tabLayout.setTabGravity(TabLayout.MODE_SCROLLABLE);
-
-            tabLayout.setTabTextColors(
-                    getColor(R.color.information_activity_light_text_mode),
-                    getColor(R.color.information_activity_light_text_mode));
-
-            Drawable upArrow = getDrawable(R.drawable.information_activity_back_light);
-            if (upArrow != null)
-                upArrow.setColorFilter(getColor(R.color.information_activity_light_icon_mode),
-                        PorterDuff.Mode.SRC_ATOP);
-            getSupportActionBar().setHomeAsUpIndicator(upArrow);
-            setOverflowButtonColor(this, false);
+        Intent intent = new Intent("Overlays.START_JOB");
+        Switch enable_swap = findViewById(R.id.enable_swap);
+        if (!References.checkOMS(this)) {
+            enable_swap.setText(getString(R.string.fab_menu_swap_toggle_legacy));
         }
-        final InformationTabsAdapter adapter = new InformationTabsAdapter
-                (getSupportFragmentManager(), (tabLayout != null) ? tabLayout.getTabCount() : 0,
-                        theme_mode, tab_checker);
+        if (enable_swap != null) {
+            boolean enabled = prefs.getBoolean("enable_swapping_overlays", true);
+            intent.putExtra("command", "MixAndMatchMode");
+            intent.putExtra("newValue", enabled);
+            localBroadcastManager.sendBroadcast(intent);
+            enable_swap.setChecked(enabled);
 
-        if (viewPager != null) {
-            viewPager.setOffscreenPageLimit((tabLayout != null) ? tabLayout.getTabCount() : 0);
-            viewPager.setAdapter(adapter);
-            viewPager.addOnPageChangeListener(
-                    new TabLayout.TabLayoutOnPageChangeListener(tabLayout) {
-                        @Override
-                        public void onPageSelected(int position) {
-                            tabPosition = position;
-                            switch (viewPager.getAdapter().instantiateItem(viewPager, tabPosition)
-                                    .getClass().getSimpleName()) {
-                                case "Overlays":
-                                    floatingActionButton.show();
-                                    floatingActionButton.setImageResource(
-                                            R.drawable.floating_action_button_icon);
-                                    break;
-                            }
-                        }
-                    });
-            if (tabLayout != null) tabLayout.addOnTabSelectedListener(
-                    new TabLayout.OnTabSelectedListener() {
-                        @Override
-                        public void onTabSelected(TabLayout.Tab tab) {
-                            viewPager.setCurrentItem(tab.getPosition());
-                        }
-
-                        @Override
-                        public void onTabUnselected(TabLayout.Tab tab) {
-                        }
-
-                        @Override
-                        public void onTabReselected(TabLayout.Tab tab) {
-                        }
-                    });
-
-            PagerAdapter adapt = viewPager.getAdapter();
-            LocalBroadcastManager localBroadcastManager =
-                    LocalBroadcastManager.getInstance(getApplicationContext());
-            floatingActionButton.setOnClickListener(v -> {
-                try {
-                    boolean isLunchbarOpen = closeAllLunchBars();
-                    final Handler handler = new Handler();
-                    handler.postDelayed(() -> {
-                        Intent intent;
-                        switch (adapt.instantiateItem(viewPager, tabPosition)
-                                .getClass().getSimpleName()) {
-                            case "Overlays":
-                                materialSheetFab.showSheet();
-                                break;
-                        }
-                    }, isLunchbarOpen ? LUNCHBAR_DISMISS_FAB_CLICK_DELAY : 0);
-                } catch (NullPointerException npe) {
-                    // Suppress warning
-                }
-            });
-
-            Intent intent = new Intent("Overlays.START_JOB");
-            Switch enable_swap = findViewById(R.id.enable_swap);
-            if (!References.checkOMS(this)) {
-                enable_swap.setText(getString(R.string.fab_menu_swap_toggle_legacy));
-            }
-            if (enable_swap != null) {
-                boolean enabled = prefs.getBoolean("enable_swapping_overlays", true);
+            enable_swap.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                prefs.edit().putBoolean("enable_swapping_overlays", isChecked).apply();
                 intent.putExtra("command", "MixAndMatchMode");
-                intent.putExtra("newValue", enabled);
+                intent.putExtra("newValue", isChecked);
                 localBroadcastManager.sendBroadcast(intent);
-                enable_swap.setChecked(enabled);
-
-                enable_swap.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                    prefs.edit().putBoolean("enable_swapping_overlays", isChecked).apply();
-                    intent.putExtra("command", "MixAndMatchMode");
-                    intent.putExtra("newValue", isChecked);
-                    localBroadcastManager.sendBroadcast(intent);
-                });
-            }
-
-            final TextView compile_enable_selected = findViewById(R.id.compile_enable_selected);
-            if (!References.checkOMS(this)) compile_enable_selected.setVisibility(View.GONE);
-            if (compile_enable_selected != null) {
-                compile_enable_selected.setOnClickListener(v -> {
-                    materialSheetFab.setEventListener(new MaterialSheetFabEventListener() {
-                        @Override
-                        public void onSheetHidden() {
-                            super.onSheetHidden();
-                            intent.putExtra("command", "CompileEnable");
-                            localBroadcastManager.sendBroadcast(intent);
-                            materialSheetFab.setEventListener(null);
-                        }
-                    });
-                    materialSheetFab.hideSheet();
-                });
-            }
-
-            TextView compile_update_selected = findViewById(R.id.compile_update_selected);
-            if (!References.checkOMS(this)) {
-                compile_update_selected.setText(getString(R.string.fab_menu_compile_install));
-            }
-            if (compile_update_selected != null) {
-                compile_update_selected.setOnClickListener(v -> {
-                    materialSheetFab.setEventListener(new MaterialSheetFabEventListener() {
-                        @Override
-                        public void onSheetHidden() {
-                            super.onSheetHidden();
-                            intent.putExtra("command", "CompileUpdate");
-                            localBroadcastManager.sendBroadcast(intent);
-                            materialSheetFab.setEventListener(null);
-                        }
-                    });
-                    materialSheetFab.hideSheet();
-                });
-            }
-
-            TextView disable_selected = findViewById(R.id.disable_selected);
-            if (!References.checkOMS(this)) {
-                disable_selected.setText(getString(R.string.fab_menu_uninstall));
-            }
-            if (disable_selected != null) {
-                disable_selected.setOnClickListener(v -> {
-                    materialSheetFab.setEventListener(new MaterialSheetFabEventListener() {
-                        @Override
-                        public void onSheetHidden() {
-                            super.onSheetHidden();
-                            intent.putExtra("command", "Disable");
-                            localBroadcastManager.sendBroadcast(intent);
-                            materialSheetFab.setEventListener(null);
-                        }
-                    });
-                    materialSheetFab.hideSheet();
-                });
-            }
-
-            LinearLayout enable_zone = findViewById(R.id.enable);
-            if (!References.checkOMS(this)) enable_zone.setVisibility(View.GONE);
-            TextView enable_selected = findViewById(R.id.enable_selected);
-            if (enable_selected != null) {
-                enable_selected.setOnClickListener(v -> {
-                    materialSheetFab.setEventListener(new MaterialSheetFabEventListener() {
-                        @Override
-                        public void onSheetHidden() {
-                            super.onSheetHidden();
-                            intent.putExtra("command", "Enable");
-                            localBroadcastManager.sendBroadcast(intent);
-                            materialSheetFab.setEventListener(null);
-                        }
-                    });
-                    materialSheetFab.hideSheet();
-                });
-            }
+            });
         }
+
+        final TextView compile_enable_selected = findViewById(R.id.compile_enable_selected);
+        if (!References.checkOMS(this)) compile_enable_selected.setVisibility(View.GONE);
+        if (compile_enable_selected != null) {
+            compile_enable_selected.setOnClickListener(v -> {
+                materialSheetFab.setEventListener(new MaterialSheetFabEventListener() {
+                    @Override
+                    public void onSheetHidden() {
+                        super.onSheetHidden();
+                        intent.putExtra("command", "CompileEnable");
+                        localBroadcastManager.sendBroadcast(intent);
+                        materialSheetFab.setEventListener(null);
+                    }
+                });
+                materialSheetFab.hideSheet();
+            });
+        }
+
+        TextView compile_update_selected = findViewById(R.id.compile_update_selected);
+        if (!References.checkOMS(this)) {
+            compile_update_selected.setText(getString(R.string.fab_menu_compile_install));
+        }
+        if (compile_update_selected != null) {
+            compile_update_selected.setOnClickListener(v -> {
+                materialSheetFab.setEventListener(new MaterialSheetFabEventListener() {
+                    @Override
+                    public void onSheetHidden() {
+                        super.onSheetHidden();
+                        intent.putExtra("command", "CompileUpdate");
+                        localBroadcastManager.sendBroadcast(intent);
+                        materialSheetFab.setEventListener(null);
+                    }
+                });
+                materialSheetFab.hideSheet();
+            });
+        }
+
+        TextView disable_selected = findViewById(R.id.disable_selected);
+        if (!References.checkOMS(this)) {
+            disable_selected.setText(getString(R.string.fab_menu_uninstall));
+        }
+        if (disable_selected != null) {
+            disable_selected.setOnClickListener(v -> {
+                materialSheetFab.setEventListener(new MaterialSheetFabEventListener() {
+                    @Override
+                    public void onSheetHidden() {
+                        super.onSheetHidden();
+                        intent.putExtra("command", "Disable");
+                        localBroadcastManager.sendBroadcast(intent);
+                        materialSheetFab.setEventListener(null);
+                    }
+                });
+                materialSheetFab.hideSheet();
+            });
+        }
+
+        LinearLayout enable_zone = findViewById(R.id.enable);
+        if (!References.checkOMS(this)) enable_zone.setVisibility(View.GONE);
+        TextView enable_selected = findViewById(R.id.enable_selected);
+        if (enable_selected != null) {
+            enable_selected.setOnClickListener(v -> {
+                materialSheetFab.setEventListener(new MaterialSheetFabEventListener() {
+                    @Override
+                    public void onSheetHidden() {
+                        super.onSheetHidden();
+                        intent.putExtra("command", "Enable");
+                        localBroadcastManager.sendBroadcast(intent);
+                        materialSheetFab.setEventListener(null);
+                    }
+                });
+                materialSheetFab.hideSheet();
+            });
+        }
+
+        requestStoragePermissions();
+        new AOPTCheck().injectAOPT(this, false);
     }
 
     @Override
@@ -462,6 +381,17 @@ public class InformationActivity extends SubstratumActivity {
 
         menu.findItem(R.id.clean_cache).setVisible(prefs.getBoolean("caching_enabled", false));
 
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        boolean isOMS = References.checkOMS(getApplicationContext());
+        if (isOMS) {
+            menu.findItem(R.id.disable).setVisible(mStoragePerms);
+            menu.findItem(R.id.enable).setVisible(mStoragePerms);
+            menu.findItem(R.id.clean).setVisible(mStoragePerms);
+        }
         return true;
     }
 
@@ -739,5 +669,44 @@ public class InformationActivity extends SubstratumActivity {
                 finish();
             }
         }
+    }
+
+    private boolean checkPermissionGrantResults(int[] grantResults) {
+        for (int result : grantResults) {
+            if (result != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[],
+                                           int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE: {
+                if (checkPermissionGrantResults(grantResults)) {
+                    mStoragePerms = true;
+                    floatingActionButton.show();
+                }
+            }
+        }
+    }
+    private void requestStoragePermissions() {
+        int permissionCheck = ContextCompat.checkSelfPermission(
+                getApplicationContext(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+            mStoragePerms = false;
+            floatingActionButton.hide();
+            return;
+        }
+        mStoragePerms = true;
+        floatingActionButton.show();
     }
 }

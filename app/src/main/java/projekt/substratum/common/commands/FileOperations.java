@@ -25,8 +25,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import org.apache.commons.io.FileUtils;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -40,6 +38,7 @@ import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 
 import projekt.substratum.common.platform.ThemeInterfacerService;
+import projekt.substratum.util.files.FileUtils;
 import projekt.substratum.util.files.Root;
 
 import static projekt.substratum.common.References.ENABLE_DIRECT_ASSETS_LOGGING;

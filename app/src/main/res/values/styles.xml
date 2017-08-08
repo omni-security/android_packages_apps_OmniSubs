@@ -39,11 +39,6 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
 
-    <style name="CustomWelcomeScreenTheme" parent="WelcomeScreenTheme">
-        <item name="welcomeIndicatorStyle">@style/WelcomeScreenPageIndicator.Custom</item>
-        <item name="welcomeTitleTextStyle">@style/WelcomeScreenText.Title.Centered</item>
-    </style>
-
     <style name="LeakCanaryTheme" parent="android:Theme.Material"/>
 
     <style name="PhotoCrop.ActivityTheme" parent="Theme.AppCompat">
@@ -101,32 +96,6 @@
         <item name="android:windowIsFloating">true</item>
         <item name="android:backgroundDimEnabled">false</item>
         <item name="android:windowAnimationStyle">@style/SubstratumBuilder.WindowAnimation</item>
-    </style>
-
-    <style name="FloatUiDialog" parent="@android:style/Theme.Material.Dialog.Alert">
-        <item name="android:colorAccent">@color/floatui_dialog_button_color</item>
-        <item name="android:windowTitleStyle">@style/FloatUiDialog</item>
-        <item name="android:windowBackground">@color/floatui_dialog_background</item>
-        <item name="android:colorBackgroundCacheHint">@null</item>
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowAnimationStyle">@style/FloatUiAnimation</item>
-    </style>
-
-    <style name="FloatUiAnimation" parent="@android:style/Animation.Activity">
-        <item name="android:windowEnterAnimation">@anim/floatui_anim_in</item>
-        <item name="android:windowExitAnimation">@anim/floatui_anim_out</item>
-    </style>
-
-    <style name="FloatUiDialogTitle" parent="@android:style/TextAppearance.DialogWindowTitle">
-        <item name="android:gravity">center_horizontal</item>
-    </style>
-
-    <style name="WelcomeScreenPageIndicator.Custom">
-        <item name="animation">fade</item>
-    </style>
-
-    <style name="WelcomeScreenText.Title.Centered.Custom">
-        <item name="android:textSize">30sp</item>
     </style>
 
     <style name="Widget.MaterialSheetFab.Sheet" parent="">

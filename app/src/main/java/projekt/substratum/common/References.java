@@ -54,7 +54,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import org.apache.commons.io.IOUtils;
 import org.omnirom.substratum.R;
 
 import java.io.BufferedReader;
@@ -99,6 +98,7 @@ import projekt.substratum.services.packages.OverlayUpdater;
 import projekt.substratum.services.packages.PackageModificationDetector;
 import projekt.substratum.services.system.InterfacerAuthorizationReceiver;
 import projekt.substratum.util.compilers.CacheCreator;
+import projekt.substratum.util.files.IOUtils;
 import projekt.substratum.util.injectors.AOPTCheck;
 import projekt.substratum.util.readers.ReadSupportedROMsFile;
 import projekt.substratum.util.readers.ReadVariantPrioritizedColor;
@@ -367,8 +367,9 @@ public class References {
 
 
     public static boolean isCachingEnabled(Context context) {
-        return PreferenceManager.getDefaultSharedPreferences(context)
-                .getBoolean("caching_enabled", false);
+        return false;
+        //return PreferenceManager.getDefaultSharedPreferences(context)
+        //        .getBoolean("caching_enabled", false);
     }
 
 

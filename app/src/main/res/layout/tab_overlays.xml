@@ -21,8 +21,7 @@
                                                  android:layout_width="match_parent"
                                                  android:layout_height="match_parent"
                                                  android:background="@color/theme_information_background"
-                                                 android:fitsSystemWindows="true"
-                                                 tools:context=".MainActivity">
+                                                 tools:context=".OmniThemeActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -73,9 +72,8 @@
 
         </RelativeLayout>
 
-        <me.zhanghai.android.materialprogressbar.MaterialProgressBar
+        <ProgressBar
             android:id="@+id/progress_bar_loader"
-            style="@style/Widget.MaterialProgressBar.ProgressBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"

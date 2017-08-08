@@ -91,7 +91,6 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 import projekt.substratum.InformationActivity;
 import projekt.substratum.adapters.tabs.overlays.OverlaysAdapter;
 import projekt.substratum.adapters.tabs.overlays.OverlaysItem;
@@ -123,7 +122,6 @@ public class Overlays extends Fragment {
     public static final String overlaysDir = "overlays";
     public static final String TAG = SUBSTRATUM_BUILDER;
     public static final int THREAD_WAIT_DURATION = 500;
-    public TextView loader_string;
     public ProgressDialog mProgressDialog;
     public SubstratumBuilder sb;
     public List<OverlaysItem> overlaysLists, checkedOverlays;
@@ -150,7 +148,7 @@ public class Overlays extends Fragment {
     public ProgressBar progressBar;
     public Boolean is_active = false;
     public StringBuilder error_logs;
-    public MaterialProgressBar materialProgressBar;
+    public ProgressBar materialProgressBar;
     public double current_amount = 0;
     public double total_amount = 0;
     public String current_dialog_overlay;
