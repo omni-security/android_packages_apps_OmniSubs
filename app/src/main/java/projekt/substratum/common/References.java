@@ -1486,7 +1486,7 @@ public class References {
                                      String package_name,
                                      String theme_mode,
                                      String actionIntent) {
-        boolean should_debug = org.omnirom.substratum.BuildConfig.DEBUG;
+        boolean should_debug = false;
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
         if (should_debug) Log.d("ThemeLauncher", "Creating new intent...");
         Intent intentActivity;

@@ -24,49 +24,38 @@ else
 support_library_root_dir := prebuilts/sdk/current/support
 endif
 
-LOCAL_STATIC_JAVA_LIBRARIES += android-support-v7-preference \
-    android-support-compat \
+LOCAL_STATIC_JAVA_LIBRARIES += android-support-compat \
     android-support-core-utils \
     android-support-core-ui \
-    android-support-media-compat \
     android-support-fragment \
-    android-support-v14-preference \
+    android-support-design \
     android-support-v7-palette \
     android-support-v7-appcompat \
     android-support-v7-gridlayout \
     android-support-v7-cardview \
     android-support-v7-recyclerview \
+    apksig \
+    bcprov-jdk16 \
+    overlay-manager-service
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res \
-                      $(support_library_root_dir)/v14/preference/res \
-                      $(support_library_root_dir)/v7/preference/res \
                       $(support_library_root_dir)/v7/appcompat/res \
                       $(support_library_root_dir)/v7/recyclerview/res \
                       $(support_library_root_dir)/v7/gridlayout/res \
                       $(support_library_root_dir)/v7/cardview/res \
-                      $(support_library_root_dir)/transition/res \
-                      $(support_library_root_dir)/percent/res \
                       $(support_library_root_dir)/design/res
 
 LOCAL_AAPT_FLAGS := --auto-add-overlay \
-    --extra-packages android.support.v14.preference \
-    --extra-packages android.support.v7.preference \
     --extra-packages android.support.v7.appcompat \
     --extra-packages android.support.v7.recyclerview \
     --extra-packages android.support.v7.gridlayout \
     --extra-packages android.support.v7.cardview \
-    --extra-packages android.support.transition \
-    --extra-packages android.support.percent \
-    --extra-packages android.support.design \
-
-LOCAL_STATIC_JAVA_AAR_LIBRARIES += apksig \
-    bcprov-jdk16 \
-    overlay-manager-service
+    --extra-packages android.support.design
 
 LOCAL_PROGUARD_FLAG_FILES := ../../proguard-rules.pro
 LOCAL_JAR_EXCLUDE_FILES := none
-LOCAL_SRC_FILES += $(call all-java-files-under, java)
-LOCAL_PACKAGE_NAME := OmniTheme
+LOCAL_SRC_FILES += $(call all-java-files-under, java) $(call all-Iaidl-files-under, aidl)
+LOCAL_PACKAGE_NAME := OmniSubs
 LOCAL_SDK_VERSION := current
 LOCAL_MODULE_TAGS := optional
 include $(BUILD_PACKAGE)

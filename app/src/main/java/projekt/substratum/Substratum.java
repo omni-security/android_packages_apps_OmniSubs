@@ -20,14 +20,9 @@ package projekt.substratum;
 
 import android.app.ActivityManager;
 import android.app.Application;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioAttributes;
 import android.util.Log;
-
-import org.omnirom.substratum.R;
 
 import projekt.substratum.common.References;
 import projekt.substratum.services.binder.BinderService;
@@ -47,33 +42,6 @@ public class Substratum extends Application {
         substratum = this;
         startBinderService();
         References.registerBroadcastReceivers(this);
-        createNotificationChannel();
-    }
-
-    public void createNotificationChannel() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            NotificationManager notificationManager =
-                    (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            NotificationChannel mainChannel = new NotificationChannel(
-                    References.DEFAULT_NOTIFICATION_CHANNEL_ID,
-                    getString(R.string.notification_channel_default),
-                    NotificationManager.IMPORTANCE_DEFAULT);
-            mainChannel.setDescription(
-                    getString(R.string.notification_channel_default_description));
-            mainChannel.setSound(null, new AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                    .build());
-            assert notificationManager != null;
-            notificationManager.createNotificationChannel(mainChannel);
-
-            NotificationChannel compileChannel = new NotificationChannel(
-                    References.ONGOING_NOTIFICATION_CHANNEL_ID,
-                    getString(R.string.notification_channel_ongoing),
-                    NotificationManager.IMPORTANCE_LOW);
-            mainChannel.setDescription(
-                    getString(R.string.notification_channel_ongoing_description));
-            notificationManager.createNotificationChannel(compileChannel);
-        }
     }
 
     public void startBinderService() {

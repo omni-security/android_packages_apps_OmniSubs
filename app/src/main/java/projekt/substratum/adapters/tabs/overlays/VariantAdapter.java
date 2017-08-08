@@ -29,9 +29,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.omnirom.substratum.R;
+
 import java.util.ArrayList;
 
-import org.omnirom.substratum.R;
 import projekt.substratum.common.References;
 
 public class VariantAdapter extends ArrayAdapter<VariantItem> {
@@ -59,8 +60,8 @@ public class VariantAdapter extends ArrayAdapter<VariantItem> {
                     this.getContext()).inflate(R.layout.preview_spinner, parent, false);
 
             holder = new ViewHolder();
-            holder.variantName = convertView.findViewById(R.id.variant_name);
-            holder.variantHex = convertView.findViewById(R.id.variant_hex);
+            holder.variantName = (TextView) convertView.findViewById(R.id.variant_name);
+            holder.variantHex = (ImageView) convertView.findViewById(R.id.variant_hex);
 
             convertView.setTag(holder);
         } else {

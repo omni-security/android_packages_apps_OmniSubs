@@ -24,7 +24,6 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.Lunchbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
@@ -40,25 +39,25 @@ public class TeamActivity extends SubstratumActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.team_activity);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             toolbar.setTitle(R.string.nav_team_contributors);
-            toolbar.setTitleTextColor(getColor(R.color.information_activity_light_icon_mode));
+            toolbar.setTitleTextColor(getResources().getColor(R.color.information_activity_light_icon_mode));
         }
 
         setSupportActionBar(toolbar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        Drawable upArrow = getDrawable(R.drawable.information_activity_back_light);
+        Drawable upArrow = getResources().getDrawable(R.drawable.information_activity_back_light);
         if (upArrow != null)
-            upArrow.setColorFilter(getColor(R.color.information_activity_light_icon_mode),
+            upArrow.setColorFilter(getResources().getColor(R.color.information_activity_light_icon_mode),
                     PorterDuff.Mode.SRC_ATOP);
         getSupportActionBar().setHomeAsUpIndicator(upArrow);
 
         if (toolbar != null) toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
-        CardView nicholas_card = findViewById(R.id.nicholas_card);
+        CardView nicholas_card = (CardView) findViewById(R.id.nicholas_card);
         nicholas_card.setOnClickListener(v -> {
             try {
                 String playURL = getString(R.string.team_nicholas_link);
@@ -66,14 +65,10 @@ public class TeamActivity extends SubstratumActivity {
                 i.setData(Uri.parse(playURL));
                 startActivity(i);
             } catch (ActivityNotFoundException activityNotFoundException) {
-                Lunchbar.make(findViewById(android.R.id.content),
-                        getString(R.string.activity_missing_toast),
-                        Lunchbar.LENGTH_LONG)
-                        .show();
             }
         });
 
-        CardView syko_card = findViewById(R.id.syko_card);
+        CardView syko_card = (CardView) findViewById(R.id.syko_card);
         syko_card.setOnClickListener(v -> {
             try {
                 String playURL = getString(R.string.team_syko_link);
@@ -81,14 +76,10 @@ public class TeamActivity extends SubstratumActivity {
                 i.setData(Uri.parse(playURL));
                 startActivity(i);
             } catch (ActivityNotFoundException activityNotFoundException) {
-                Lunchbar.make(findViewById(android.R.id.content),
-                        getString(R.string.activity_missing_toast),
-                        Lunchbar.LENGTH_LONG)
-                        .show();
             }
         });
 
-        CardView ivan_card = findViewById(R.id.ivan_card);
+        CardView ivan_card = (CardView) findViewById(R.id.ivan_card);
         ivan_card.setOnClickListener(v -> {
             try {
                 String playURL = getString(R.string.team_ivan_link);
@@ -96,33 +87,21 @@ public class TeamActivity extends SubstratumActivity {
                 i.setData(Uri.parse(playURL));
                 startActivity(i);
             } catch (ActivityNotFoundException activityNotFoundException) {
-                Lunchbar.make(findViewById(android.R.id.content),
-                        getString(R.string.activity_missing_toast),
-                        Lunchbar.LENGTH_LONG)
-                        .show();
             }
         });
 
-        CardView surge_card = findViewById(R.id.surge_card);
+        CardView surge_card = (CardView) findViewById(R.id.surge_card);
         surge_card.setOnClickListener(v -> {
             try {
                 String playURL = getString(R.string.team_surge_link);
                 Intent i = new Intent(Intent.ACTION_VIEW);
                 i.setData(Uri.parse(playURL));
                 startActivity(i);
-                Lunchbar.make(findViewById(android.R.id.content),
-                        getString(R.string.activity_missing_toast),
-                        Lunchbar.LENGTH_LONG)
-                        .show();
             } catch (ActivityNotFoundException activityNotFoundException) {
-                Lunchbar.make(findViewById(android.R.id.content),
-                        getString(R.string.activity_missing_toast),
-                        Lunchbar.LENGTH_LONG)
-                        .show();
             }
         });
 
-        CardView george_card = findViewById(R.id.george_card);
+        CardView george_card = (CardView) findViewById(R.id.george_card);
         george_card.setOnClickListener(v -> {
             try {
                 String playURL = getString(R.string.team_george_link);
@@ -130,14 +109,10 @@ public class TeamActivity extends SubstratumActivity {
                 i.setData(Uri.parse(playURL));
                 startActivity(i);
             } catch (ActivityNotFoundException activityNotFoundException) {
-                Lunchbar.make(findViewById(android.R.id.content),
-                        getString(R.string.activity_missing_toast),
-                        Lunchbar.LENGTH_LONG)
-                        .show();
             }
         });
 
-        CardView nathan_card = findViewById(R.id.nathan_card);
+        CardView nathan_card = (CardView) findViewById(R.id.nathan_card);
         nathan_card.setOnClickListener(v -> {
             try {
                 String playURL = getString(R.string.team_nathan_link);
@@ -145,14 +120,10 @@ public class TeamActivity extends SubstratumActivity {
                 i.setData(Uri.parse(playURL));
                 startActivity(i);
             } catch (ActivityNotFoundException activityNotFoundException) {
-                Lunchbar.make(findViewById(android.R.id.content),
-                        getString(R.string.activity_missing_toast),
-                        Lunchbar.LENGTH_LONG)
-                        .show();
             }
         });
 
-        CardView char_card = findViewById(R.id.char_card);
+        CardView char_card = (CardView) findViewById(R.id.char_card);
         char_card.setOnClickListener(v -> {
             try {
                 String playURL = getString(R.string.team_char_link);
@@ -160,14 +131,10 @@ public class TeamActivity extends SubstratumActivity {
                 i.setData(Uri.parse(playURL));
                 startActivity(i);
             } catch (ActivityNotFoundException activityNotFoundException) {
-                Lunchbar.make(findViewById(android.R.id.content),
-                        getString(R.string.activity_missing_toast),
-                        Lunchbar.LENGTH_LONG)
-                        .show();
             }
         });
 
-        Button development_contributors = findViewById(R.id.list_button_contributors);
+        Button development_contributors = (Button) findViewById(R.id.list_button_contributors);
         development_contributors.setOnClickListener(v -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setItems(getResources().getStringArray(R.array.substratum_contributors),
@@ -177,7 +144,7 @@ public class TeamActivity extends SubstratumActivity {
             alert.show();
         });
 
-        Button contribute = findViewById(R.id.list_button_translators_contribute);
+        Button contribute = (Button) findViewById(R.id.list_button_translators_contribute);
         contribute.setOnClickListener(v -> {
             try {
                 String playURL = getString(R.string.crowdin_url);
@@ -185,14 +152,10 @@ public class TeamActivity extends SubstratumActivity {
                 i.setData(Uri.parse(playURL));
                 startActivity(i);
             } catch (ActivityNotFoundException activityNotFoundException) {
-                Lunchbar.make(findViewById(android.R.id.content),
-                        getString(R.string.activity_missing_toast),
-                        Lunchbar.LENGTH_LONG)
-                        .show();
             }
         });
 
-        Button layers = findViewById(R.id.list_button_layers);
+        Button layers = (Button) findViewById(R.id.list_button_layers);
         layers.setOnClickListener(v -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setItems(getResources().getStringArray(R.array.layers_contributors),
@@ -202,7 +165,7 @@ public class TeamActivity extends SubstratumActivity {
             alert.show();
         });
 
-        Button translators = findViewById(R.id.list_button_translators);
+        Button translators = (Button) findViewById(R.id.list_button_translators);
         translators.setOnClickListener(v -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setItems(getResources().getStringArray(R.array.translations),

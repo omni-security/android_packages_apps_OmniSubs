@@ -33,12 +33,12 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.design.widget.Lunchbar;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import org.omnirom.substratum.R;
 
@@ -57,8 +57,6 @@ import projekt.substratum.util.compilers.CacheCreator;
 import projekt.substratum.util.compilers.SubstratumBuilder;
 import projekt.substratum.util.files.FileUtils;
 
-import static projekt.substratum.InformationActivity.currentShownLunchBar;
-import static projekt.substratum.common.References.DEFAULT_NOTIFICATION_CHANNEL_ID;
 import static projekt.substratum.common.References.REFRESH_WINDOW_DELAY;
 import static projekt.substratum.common.References.checkOMS;
 import static projekt.substratum.common.References.checkThemeInterfacer;
@@ -92,8 +90,7 @@ class OverlayFunctions {
                 fragment.mNotifyManager =
                         (NotificationManager) context.getSystemService(
                                 Context.NOTIFICATION_SERVICE);
-                fragment.mBuilder = new NotificationCompat.Builder(context,
-                        References.DEFAULT_NOTIFICATION_CHANNEL_ID);
+                fragment.mBuilder = new NotificationCompat.Builder(context);
                 fragment.mBuilder.setContentTitle(
                         context.getString(R.string.notification_initial_title))
                         .setProgress(100, 0, true)
@@ -900,11 +897,9 @@ class OverlayFunctions {
             } else {
                 fragment.compile_enable_mode = false;
                 fragment.enable_mode = false;
-                currentShownLunchBar = Lunchbar.make(
-                        fragment.getActivityView(),
+                Toast.makeText(fragment.getContext(),
                         R.string.toast_disabled3,
-                        Lunchbar.LENGTH_LONG);
-                currentShownLunchBar.show();
+                        Toast.LENGTH_LONG);
             }
         }
     }
@@ -972,11 +967,9 @@ class OverlayFunctions {
                 }
             } else {
                 fragment.disable_mode = false;
-                currentShownLunchBar = Lunchbar.make(
-                        fragment.getActivityView(),
+                Toast.makeText(fragment.getContext(),
                         R.string.toast_disabled4,
-                        Lunchbar.LENGTH_LONG);
-                currentShownLunchBar.show();
+                        Toast.LENGTH_LONG);
             }
         }
     }
@@ -1009,8 +1002,7 @@ class OverlayFunctions {
                 // Closing off the persistent notification
                 if (fragment.checkActiveNotifications()) {
                     fragment.mNotifyManager.cancel(fragment.id);
-                    fragment.mBuilder = new NotificationCompat.Builder(
-                            context, DEFAULT_NOTIFICATION_CHANNEL_ID);
+                    fragment.mBuilder = new NotificationCompat.Builder(context);
                     fragment.mBuilder.setAutoCancel(true);
                     fragment.mBuilder.setProgress(0, 0, false);
                     fragment.mBuilder.setOngoing(false);
@@ -1027,17 +1019,13 @@ class OverlayFunctions {
                 }
 
                 if (fragment.missingType3) {
-                    currentShownLunchBar = Lunchbar.make(
-                            fragment.getActivityView(),
+                    Toast.makeText(fragment.getContext(),
                             R.string.toast_compiled_missing,
-                            Lunchbar.LENGTH_LONG);
-                    currentShownLunchBar.show();
+                            Toast.LENGTH_LONG);
                 } else {
-                    currentShownLunchBar = Lunchbar.make(
-                            fragment.getActivityView(),
+                    Toast.makeText(fragment.getContext(),
                             R.string.toast_compiled_updated,
-                            Lunchbar.LENGTH_LONG);
-                    currentShownLunchBar.show();
+                            Toast.LENGTH_LONG);
                 }
             }
         }

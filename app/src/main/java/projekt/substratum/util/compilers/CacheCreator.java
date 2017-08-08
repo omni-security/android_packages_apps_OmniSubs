@@ -32,6 +32,8 @@ import android.service.notification.StatusBarNotification;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import org.omnirom.substratum.R;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -40,7 +42,6 @@ import java.io.PrintWriter;
 
 import javax.crypto.Cipher;
 
-import org.omnirom.substratum.R;
 import projekt.substratum.common.References;
 import projekt.substratum.common.commands.FileOperations;
 
@@ -143,8 +144,7 @@ public class CacheCreator {
 
             mNotifyManager = (NotificationManager) mContext.getSystemService(
                     Context.NOTIFICATION_SERVICE);
-            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mContext,
-                    References.ONGOING_NOTIFICATION_CHANNEL_ID);
+            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mContext);
 
             mBuilder.setContentTitle(theme_name)
                     .setProgress(files, 0, true)

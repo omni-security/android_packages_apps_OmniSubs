@@ -21,6 +21,7 @@ package projekt.substratum;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -36,12 +37,10 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Lunchbar;
-import android.support.v13.app.ActivityCompat;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
@@ -54,7 +53,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -87,7 +85,6 @@ public class InformationActivity extends SubstratumActivity {
     public static String theme_mode;
     public static byte[] encryption_key;
     public static byte[] iv_encrypt_key;
-    public static Lunchbar currentShownLunchBar;
     private static List<String> tab_checker;
     private Boolean uninstalled = false;
     private byte[] byteArray;
@@ -99,7 +96,7 @@ public class InformationActivity extends SubstratumActivity {
     private boolean mStoragePerms;
     private FloatingActionButton floatingActionButton;
 
-    private class FabDialog extends AlertDialog implements View.OnClickListener {
+    private class FabDialog extends Dialog implements View.OnClickListener {
         private Switch enable_swap;
         private TextView compile_enable_selected;
         private TextView compile_update_selected;
@@ -115,35 +112,35 @@ public class InformationActivity extends SubstratumActivity {
             setContentView(R.layout.sheet_dialog);
 
             boolean checkOMS = References.checkOMS(InformationActivity.this);
-            enable_swap = findViewById(R.id.enable_swap);
+            enable_swap = (Switch) findViewById(R.id.enable_swap);
             if (!checkOMS) {
                 enable_swap.setText(getString(R.string.fab_menu_swap_toggle_legacy));
             }
             enable_swap.setOnClickListener(this);
 
-            compile_enable_selected = findViewById(R.id.compile_enable_selected);
+            compile_enable_selected = (TextView) findViewById(R.id.compile_enable_selected);
             if (!checkOMS) {
                 compile_enable_selected.setVisibility(View.GONE);
             }
             compile_enable_selected.setOnClickListener(this);
 
-            compile_update_selected = findViewById(R.id.compile_update_selected);
+            compile_update_selected = (TextView) findViewById(R.id.compile_update_selected);
             if (!checkOMS) {
                 compile_update_selected.setText(getString(R.string.fab_menu_compile_install));
             }
             compile_update_selected.setOnClickListener(this);
 
-            disable_selected = findViewById(R.id.disable_selected);
+            disable_selected = (TextView) findViewById(R.id.disable_selected);
             if (!checkOMS) {
                 disable_selected.setText(getString(R.string.fab_menu_uninstall));
             }
             disable_selected.setOnClickListener(this);
 
-            LinearLayout enable_zone = findViewById(R.id.enable);
+            View enable_zone = findViewById(R.id.enable);
             if (!checkOMS) {
                 enable_zone.setVisibility(View.GONE);
             }
-            enable_selected = findViewById(R.id.enable_selected);
+            enable_selected = (TextView) findViewById(R.id.enable_selected);
             enable_selected.setOnClickListener(this);
         }
 
@@ -206,10 +203,6 @@ public class InformationActivity extends SubstratumActivity {
         return iv_encrypt_key;
     }
 
-    public static Lunchbar getCurrentShownLunchBar() {
-        return currentShownLunchBar;
-    }
-
     private static int getDominantColor(Bitmap bitmap) {
         try {
             Palette palette = Palette.from(bitmap).generate();
@@ -238,16 +231,6 @@ public class InformationActivity extends SubstratumActivity {
             overflow.setImageResource(dark_mode ? R.drawable.information_activity_overflow_dark :
                     R.drawable.information_activity_overflow_light);
         });
-    }
-
-    private boolean closeAllLunchBars() {
-        if (currentShownLunchBar != null) {
-            currentShownLunchBar.dismiss();
-            currentShownLunchBar = null;
-            return true;
-        } else {
-            return false;
-        }
     }
 
     private View getView() {
@@ -293,7 +276,7 @@ public class InformationActivity extends SubstratumActivity {
         localBroadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
         localBroadcastManager.registerReceiver(refreshReceiver, if1);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             toolbar.setTitle(theme_name);
             toolbar.setTitleTextColor(getColor(R.color.information_activity_light_icon_mode));
@@ -306,11 +289,11 @@ public class InformationActivity extends SubstratumActivity {
         }
         if (toolbar != null) toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
-        floatingActionButton = findViewById(R.id.apply_fab);
+        floatingActionButton = (FloatingActionButton) findViewById(R.id.apply_fab);
 
-        Drawable upArrow = getDrawable(R.drawable.information_activity_back_light);
+        Drawable upArrow = getResources().getDrawable(R.drawable.information_activity_back_light);
         if (upArrow != null)
-            upArrow.setColorFilter(getColor(R.color.information_activity_light_icon_mode),
+            upArrow.setColorFilter(getResources().getColor(R.color.information_activity_light_icon_mode),
                     PorterDuff.Mode.SRC_ATOP);
         getSupportActionBar().setHomeAsUpIndicator(upArrow);
         setOverflowButtonColor(this, false);
@@ -321,11 +304,7 @@ public class InformationActivity extends SubstratumActivity {
                 LocalBroadcastManager.getInstance(getApplicationContext());
         floatingActionButton.setOnClickListener(v -> {
             try {
-                boolean isLunchbarOpen = closeAllLunchBars();
-                final Handler handler = new Handler();
-                handler.postDelayed(() -> {
-                    sheetDialog.show();
-                }, isLunchbarOpen ? LUNCHBAR_DISMISS_FAB_CLICK_DELAY : 0);
+                sheetDialog.show();
             } catch (NullPointerException npe) {
                 // Suppress warning
             }

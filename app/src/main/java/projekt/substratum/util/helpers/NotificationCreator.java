@@ -24,8 +24,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.v4.app.NotificationCompat;
 
-import projekt.substratum.common.References;
-
 public class NotificationCreator {
 
     private Context mContext;
@@ -56,8 +54,7 @@ public class NotificationCreator {
             NotificationManager mNotifyManager = (NotificationManager) mContext.getSystemService(
                     Context.NOTIFICATION_SERVICE);
             NotificationCompat.Builder mBuilder = new
-                    NotificationCompat.Builder(mContext, References
-                    .DEFAULT_NOTIFICATION_CHANNEL_ID);
+                    NotificationCompat.Builder(mContext);
 
             if (content_title != null) mBuilder.setContentTitle(content_title);
             if (content_text != null) mBuilder.setContentText(content_text);

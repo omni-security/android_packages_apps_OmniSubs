@@ -43,7 +43,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.service.notification.StatusBarNotification;
-import android.support.design.widget.Lunchbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.FileProvider;
@@ -66,7 +65,6 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.omnirom.substratum.BuildConfig;
 import org.omnirom.substratum.R;
 
 import java.io.BufferedReader;
@@ -105,8 +103,6 @@ import projekt.substratum.util.files.MapUtils;
 
 import static android.content.Context.CLIPBOARD_SERVICE;
 import static android.content.om.OverlayInfo.STATE_APPROVED_ENABLED;
-import static projekt.substratum.InformationActivity.currentShownLunchBar;
-import static projekt.substratum.common.References.DEFAULT_NOTIFICATION_CHANNEL_ID;
 import static projekt.substratum.common.References.ENABLE_PACKAGE_LOGGING;
 import static projekt.substratum.common.References.EXTERNAL_STORAGE_CACHE;
 import static projekt.substratum.common.References.LEGACY_NEXUS_DIR;
@@ -122,6 +118,7 @@ public class Overlays extends Fragment {
     public static final String overlaysDir = "overlays";
     public static final String TAG = SUBSTRATUM_BUILDER;
     public static final int THREAD_WAIT_DURATION = 500;
+    public static final int VERSION_CODE = 815;
     public ProgressDialog mProgressDialog;
     public SubstratumBuilder sb;
     public List<OverlaysItem> overlaysLists, checkedOverlays;
@@ -219,11 +216,9 @@ public class Overlays extends Fragment {
             } else {
                 if (toggle_all.isChecked()) toggle_all.setChecked(false);
                 is_active = false;
-                currentShownLunchBar = Lunchbar.make(
-                        getActivityView(),
+                Toast.makeText(getContext(),
                         R.string.toast_disabled5,
-                        Lunchbar.LENGTH_LONG);
-                currentShownLunchBar.show();
+                        Toast.LENGTH_LONG);
             }
         }
     }
@@ -259,11 +254,9 @@ public class Overlays extends Fragment {
             } else {
                 if (toggle_all.isChecked()) toggle_all.setChecked(false);
                 is_active = false;
-                currentShownLunchBar = Lunchbar.make(
-                        getActivityView(),
+                Toast.makeText(getContext(),
                         R.string.toast_disabled5,
-                        Lunchbar.LENGTH_LONG);
-                currentShownLunchBar.show();
+                        Toast.LENGTH_LONG);
             }
         }
     }
@@ -305,11 +298,9 @@ public class Overlays extends Fragment {
                 } else {
                     if (toggle_all.isChecked()) toggle_all.setChecked(false);
                     is_active = false;
-                    currentShownLunchBar = Lunchbar.make(
-                            getActivityView(),
+                    Toast.makeText(getContext(),
                             R.string.toast_disabled5,
-                            Lunchbar.LENGTH_LONG);
-                    currentShownLunchBar.show();
+                            Toast.LENGTH_LONG);
                 }
             } else {
                 compile_enable_mode = false;
@@ -371,11 +362,9 @@ public class Overlays extends Fragment {
                 } else {
                     if (toggle_all.isChecked()) toggle_all.setChecked(false);
                     is_active = false;
-                    currentShownLunchBar = Lunchbar.make(
-                            getActivityView(),
+                    Toast.makeText(getContext(),
                             R.string.toast_disabled5,
-                            Lunchbar.LENGTH_LONG);
-                    currentShownLunchBar.show();
+                            Toast.LENGTH_LONG);
                 }
                 is_active = false;
                 disable_mode = false;
@@ -419,11 +408,9 @@ public class Overlays extends Fragment {
             } else {
                 if (toggle_all.isChecked()) toggle_all.setChecked(false);
                 is_active = false;
-                currentShownLunchBar = Lunchbar.make(
-                        getActivityView(),
+                Toast.makeText(getContext(),
                         R.string.toast_disabled5,
-                        Lunchbar.LENGTH_LONG);
-                currentShownLunchBar.show();
+                        Toast.LENGTH_LONG);
             }
         }
     }
@@ -477,33 +464,25 @@ public class Overlays extends Fragment {
         }
 
         if (decryptedAssetsExceptionReached) {
-            currentShownLunchBar = Lunchbar.make(
-                    getActivityView(),
-                    R.string.error_loading_theme_close_text,
-                    Lunchbar.LENGTH_INDEFINITE);
-            currentShownLunchBar.setAction(getString(R.string.error_loading_theme_close), view -> {
-                currentShownLunchBar.dismiss();
-                getActivity().finish();
-            });
-            currentShownLunchBar.show();
+            getActivity().finish();
         }
 
         mixAndMatchMode = prefs.getBoolean("enable_swapping_overlays", false);
 
-        progressBar = root.findViewById(R.id.header_loading_bar);
+        progressBar = (ProgressBar) root.findViewById(R.id.header_loading_bar);
         progressBar.setVisibility(View.GONE);
 
-        materialProgressBar = root.findViewById(R.id.progress_bar_loader);
+        materialProgressBar = (ProgressBar) root.findViewById(R.id.progress_bar_loader);
 
         // Pre-initialize the adapter first so that it won't complain for skipping layout on logs
-        mRecyclerView = root.findViewById(R.id.overlayRecyclerView);
+        mRecyclerView = (RecyclerView) root.findViewById(R.id.overlayRecyclerView);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         ArrayList<OverlaysItem> empty_array = new ArrayList<>();
         RecyclerView.Adapter empty_adapter = new OverlaysAdapter(empty_array);
         mRecyclerView.setAdapter(empty_adapter);
 
-        TextView toggle_all_overlays_text = root.findViewById(R.id.toggle_all_overlays_text);
+        TextView toggle_all_overlays_text = (TextView) root.findViewById(R.id.toggle_all_overlays_text);
         toggle_all_overlays_text.setVisibility(View.VISIBLE);
 
         File work_area = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
@@ -513,7 +492,7 @@ public class Overlays extends Fragment {
         }
 
         // Adjust the behaviour of the mix and match toggle in the sheet
-        toggle_all = root.findViewById(R.id.toggle_all_overlays);
+        toggle_all = (Switch) root.findViewById(R.id.toggle_all_overlays);
         toggle_all.setOnCheckedChangeListener(
                 (buttonView, isChecked) -> {
                     try {
@@ -529,7 +508,7 @@ public class Overlays extends Fragment {
                 });
 
         // Allow the user to toggle the select all switch by clicking on the bar above
-        RelativeLayout toggleZone = root.findViewById(R.id.toggle_zone);
+        RelativeLayout toggleZone = (RelativeLayout) root.findViewById(R.id.toggle_zone);
         toggleZone.setOnClickListener(v -> {
             try {
                 toggle_all.setChecked(!toggle_all.isChecked());
@@ -545,7 +524,7 @@ public class Overlays extends Fragment {
         });
 
         // Allow the user to swipe down to refresh the overlay list
-        swipeRefreshLayout = root.findViewById(R.id.swipeRefreshLayout);
+        swipeRefreshLayout = (SwipeRefreshLayout) root.findViewById(R.id.swipeRefreshLayout);
         swipeRefreshLayout.setOnRefreshListener(() -> {
             overlaysLists = ((OverlaysAdapter) mAdapter).getOverlayList();
             for (int i = 0; i < overlaysLists.size(); i++) {
@@ -562,7 +541,7 @@ public class Overlays extends Fragment {
         /*
           PLUGIN TYPE 3: Parse each overlay folder to see if they have folder options
          */
-        base_spinner = root.findViewById(R.id.type3_spinner);
+        base_spinner = (Spinner) root.findViewById(R.id.type3_spinner);
         Overlays overlays = this;
         base_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -723,7 +702,7 @@ public class Overlays extends Fragment {
         // Closing off the persistent notification
         if (checkActiveNotifications()) {
             mNotifyManager.cancel(id);
-            mBuilder = new NotificationCompat.Builder(context, DEFAULT_NOTIFICATION_CHANNEL_ID);
+            mBuilder = new NotificationCompat.Builder(context);
             mBuilder.setAutoCancel(true);
             mBuilder.setProgress(0, 0, false);
             mBuilder.setOngoing(false);
@@ -753,15 +732,7 @@ public class Overlays extends Fragment {
             ).execute();
         }
 
-        currentShownLunchBar = Lunchbar.make(
-                getActivityView(),
-                R.string.logcat_snackbar_text,
-                Lunchbar.LENGTH_INDEFINITE);
-        currentShownLunchBar.setAction(getString(R.string.logcat_snackbar_button), view -> {
-            currentShownLunchBar.dismiss();
-            invokeLogCharDialog(context);
-        });
-        currentShownLunchBar.show();
+        invokeLogCharDialog(context);
     }
 
     public void invokeLogCharDialog(Context context) {
@@ -773,12 +744,12 @@ public class Overlays extends Fragment {
                     RecyclerView.LayoutParams.MATCH_PARENT,
                     RecyclerView.LayoutParams.WRAP_CONTENT);
 
-        TextView text = dialog.findViewById(R.id.textField);
+        TextView text = (TextView) dialog.findViewById(R.id.textField);
         text.setText(error_logs);
-        ImageButton confirm = dialog.findViewById(R.id.confirm);
+        ImageButton confirm = (ImageButton) dialog.findViewById(R.id.confirm);
         confirm.setOnClickListener(view -> dialog.dismiss());
 
-        ImageButton copy_clipboard = dialog.findViewById(R.id.copy_clipboard);
+        ImageButton copy_clipboard = (ImageButton) dialog.findViewById(R.id.copy_clipboard);
         copy_clipboard.setOnClickListener(v -> {
             ClipboardManager clipboard =
                     (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);
@@ -786,15 +757,13 @@ public class Overlays extends Fragment {
             if (clipboard != null) {
                 clipboard.setPrimaryClip(clip);
             }
-            currentShownLunchBar = Lunchbar.make(
-                    getActivityView(),
+            Toast.makeText(getContext(),
                     R.string.logcat_dialog_copy_success,
-                    Lunchbar.LENGTH_LONG);
-            currentShownLunchBar.show();
+                    Toast.LENGTH_LONG);
             dialog.dismiss();
         });
 
-        ImageButton send = dialog.findViewById(R.id.send);
+        ImageButton send = (ImageButton) dialog.findViewById(R.id.send);
         send.setVisibility(View.GONE);
         if (References.getOverlayMetadata(context, theme_pid, metadataEmail) != null) {
             send.setVisibility(View.VISIBLE);
@@ -1086,7 +1055,7 @@ public class Overlays extends Fragment {
                     contextRef.get().getString(R.string.logcat_attachment_body),
                     device,
                     rom_version,
-                    String.valueOf(BuildConfig.VERSION_CODE),
+                    String.valueOf(VERSION_CODE),
                     theme_version,
                     failedPackages,
                     errorLog);
