@@ -180,10 +180,6 @@ public class Overlays extends Fragment {
         }
     }
 
-    protected View getActivityView() {
-        return ((ViewGroup) getActivity().findViewById(android.R.id.content)).getChildAt(0);
-    }
-
     public void startCompileEnableMode() {
         if (!is_active) {
             is_active = true;
@@ -218,7 +214,7 @@ public class Overlays extends Fragment {
                 is_active = false;
                 Toast.makeText(getContext(),
                         R.string.toast_disabled5,
-                        Toast.LENGTH_LONG);
+                        Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -256,7 +252,7 @@ public class Overlays extends Fragment {
                 is_active = false;
                 Toast.makeText(getContext(),
                         R.string.toast_disabled5,
-                        Toast.LENGTH_LONG);
+                        Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -300,7 +296,7 @@ public class Overlays extends Fragment {
                     is_active = false;
                     Toast.makeText(getContext(),
                             R.string.toast_disabled5,
-                            Toast.LENGTH_LONG);
+                            Toast.LENGTH_LONG).show();
                 }
             } else {
                 compile_enable_mode = false;
@@ -364,7 +360,7 @@ public class Overlays extends Fragment {
                     is_active = false;
                     Toast.makeText(getContext(),
                             R.string.toast_disabled5,
-                            Toast.LENGTH_LONG);
+                            Toast.LENGTH_LONG).show();
                 }
                 is_active = false;
                 disable_mode = false;
@@ -410,7 +406,7 @@ public class Overlays extends Fragment {
                 is_active = false;
                 Toast.makeText(getContext(),
                         R.string.toast_disabled5,
-                        Toast.LENGTH_LONG);
+                        Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -759,7 +755,7 @@ public class Overlays extends Fragment {
             }
             Toast.makeText(getContext(),
                     R.string.logcat_dialog_copy_success,
-                    Toast.LENGTH_LONG);
+                    Toast.LENGTH_LONG).show();
             dialog.dismiss();
         });
 

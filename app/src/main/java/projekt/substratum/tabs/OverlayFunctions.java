@@ -899,7 +899,7 @@ class OverlayFunctions {
                 fragment.enable_mode = false;
                 Toast.makeText(fragment.getContext(),
                         R.string.toast_disabled3,
-                        Toast.LENGTH_LONG);
+                        Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -969,7 +969,7 @@ class OverlayFunctions {
                 fragment.disable_mode = false;
                 Toast.makeText(fragment.getContext(),
                         R.string.toast_disabled4,
-                        Toast.LENGTH_LONG);
+                        Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -1021,11 +1021,11 @@ class OverlayFunctions {
                 if (fragment.missingType3) {
                     Toast.makeText(fragment.getContext(),
                             R.string.toast_compiled_missing,
-                            Toast.LENGTH_LONG);
+                            Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(fragment.getContext(),
                             R.string.toast_compiled_updated,
-                            Toast.LENGTH_LONG);
+                            Toast.LENGTH_LONG).show();
                 }
             }
         }
