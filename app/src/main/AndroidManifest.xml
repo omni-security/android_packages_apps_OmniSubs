@@ -20,7 +20,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools"
           package="org.omnirom.substratum"
-          android:installLocation="internalOnly">
+          android:installLocation="internalOnly"
+          android:versionCode="815"
+          android:versionName="eight hundred fifteen" >
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_SUPERUSER"/>
