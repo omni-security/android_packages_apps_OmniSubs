@@ -13,3 +13,6 @@ Pull requests to dev would be highly appreciated and accepted!
 # team code review
 To submit a code patch towards any platform applications, please direct them all to our Gerrit server!
 https://substratum.review
+
+# OmniROM modifications
+Stripped down version to support only one theme that is shipped with OmniROM
