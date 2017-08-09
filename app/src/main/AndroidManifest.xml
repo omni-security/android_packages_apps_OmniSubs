@@ -63,15 +63,13 @@
 
         <activity
             android:name="projekt.substratum.activities.launch.ThemeLaunchActivity"
-            android:resizeableActivity="false"
             android:theme="@style/Theme.AppCompat.Translucent">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
             </intent-filter>
         </activity>
         <activity
-            android:name=".OmniThemeActivity"
-            android:resizeableActivity="false">
+            android:name=".OmniThemeActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
             </intent-filter>
@@ -80,7 +78,6 @@
         <activity
             android:name="projekt.substratum.InformationActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:resizeableActivity="false"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -90,7 +87,6 @@
         <activity
             android:name="projekt.substratum.TeamActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:resizeableActivity="false"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

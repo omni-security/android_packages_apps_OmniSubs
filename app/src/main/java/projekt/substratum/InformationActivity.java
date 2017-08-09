@@ -116,7 +116,14 @@ public class InformationActivity extends SubstratumActivity {
             if (!checkOMS) {
                 enable_swap.setText(getString(R.string.fab_menu_swap_toggle_legacy));
             }
-            enable_swap.setOnClickListener(this);
+            boolean enabled = prefs.getBoolean("enable_swapping_overlays", false);
+            enable_swap.setChecked(enabled);
+            enable_swap.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                Intent intent = new Intent("Overlays.START_JOB");
+                intent.putExtra("command", "MixAndMatchMode");
+                intent.putExtra("newValue", isChecked);
+                localBroadcastManager.sendBroadcast(intent);
+            });
 
             compile_enable_selected = (TextView) findViewById(R.id.compile_enable_selected);
             if (!checkOMS) {
@@ -147,21 +154,6 @@ public class InformationActivity extends SubstratumActivity {
         @Override
         public void onClick(View view) {
             Intent intent = new Intent("Overlays.START_JOB");
-
-            if (view == enable_swap) {
-                boolean enabled = prefs.getBoolean("enable_swapping_overlays", true);
-                intent.putExtra("command", "MixAndMatchMode");
-                intent.putExtra("newValue", enabled);
-                localBroadcastManager.sendBroadcast(intent);
-                enable_swap.setChecked(enabled);
-
-                enable_swap.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                    prefs.edit().putBoolean("enable_swapping_overlays", isChecked).apply();
-                    intent.putExtra("command", "MixAndMatchMode");
-                    intent.putExtra("newValue", isChecked);
-                    localBroadcastManager.sendBroadcast(intent);
-                });
-            }
             if (view == compile_enable_selected) {
                 dismiss();
                 intent.putExtra("command", "CompileEnable");
