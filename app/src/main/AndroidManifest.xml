@@ -76,7 +76,7 @@
         </activity>
 
         <activity
-            android:name="projekt.substratum.InformationActivity"
+            android:name="projekt.substratum.OmniActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>

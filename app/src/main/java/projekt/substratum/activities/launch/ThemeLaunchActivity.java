@@ -26,7 +26,7 @@ import android.os.Bundle;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import projekt.substratum.InformationActivity;
+import projekt.substratum.OmniActivity;
 import projekt.substratum.common.References;
 
 import static android.content.pm.PackageManager.GET_META_DATA;
@@ -50,7 +50,7 @@ public class ThemeLaunchActivity extends Activity {
                                              byte[] iv_encrypt_key,
                                              Boolean theme_legacy) {
 
-        Intent intent = new Intent(context, InformationActivity.class);
+        Intent intent = new Intent(context, OmniActivity.class);
         intent.addCategory(Intent.CATEGORY_LAUNCHER);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

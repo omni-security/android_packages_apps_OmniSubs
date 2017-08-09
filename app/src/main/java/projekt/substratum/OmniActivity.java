@@ -31,8 +31,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -44,7 +42,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.graphics.Palette;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -77,15 +74,13 @@ import static projekt.substratum.common.References.BYPASS_SUBSTRATUM_BUILDER_DEL
 import static projekt.substratum.common.References.MANAGER_REFRESH;
 import static projekt.substratum.common.References.metadataOverlayParent;
 
-public class InformationActivity extends SubstratumActivity {
+public class OmniActivity extends SubstratumActivity {
 
-    private static final int LUNCHBAR_DISMISS_FAB_CLICK_DELAY = 200;
     public static String theme_name;
     public static String theme_pid;
     public static String theme_mode;
     public static byte[] encryption_key;
     public static byte[] iv_encrypt_key;
-    private static List<String> tab_checker;
     private Boolean uninstalled = false;
     private byte[] byteArray;
     private SharedPreferences prefs;
@@ -111,7 +106,7 @@ public class InformationActivity extends SubstratumActivity {
             super.onCreate(savedInstanceState);
             setContentView(R.layout.sheet_dialog);
 
-            boolean checkOMS = References.checkOMS(InformationActivity.this);
+            boolean checkOMS = References.checkOMS(OmniActivity.this);
             enable_swap = (Switch) findViewById(R.id.enable_swap);
             if (!checkOMS) {
                 enable_swap.setText(getString(R.string.fab_menu_swap_toggle_legacy));
@@ -195,16 +190,6 @@ public class InformationActivity extends SubstratumActivity {
         return iv_encrypt_key;
     }
 
-    private static int getDominantColor(Bitmap bitmap) {
-        try {
-            Palette palette = Palette.from(bitmap).generate();
-            return palette.getDominantColor(Color.TRANSPARENT);
-        } catch (IllegalArgumentException iae) {
-            // Suppress warning
-        }
-        return Color.TRANSPARENT;
-    }
-
     private static void setOverflowButtonColor(final Activity activity, final Boolean dark_mode) {
         @SuppressLint("PrivateResource") final String overflowDescription =
                 activity.getString(R.string.abc_action_menu_overflow_description);
@@ -223,18 +208,6 @@ public class InformationActivity extends SubstratumActivity {
             overflow.setImageResource(dark_mode ? R.drawable.information_activity_overflow_dark :
                     R.drawable.information_activity_overflow_light);
         });
-    }
-
-    private View getView() {
-        return ((ViewGroup) this.findViewById(android.R.id.content)).getChildAt(0);
-    }
-
-    private boolean checkColorDarkness(int color) {
-        double darkness =
-                1 - (0.299 * Color.red(color) +
-                        0.587 * Color.green(color) +
-                        0.114 * Color.blue(color)) / 255;
-        return darkness < 0.5;
     }
 
     @Override
@@ -352,7 +325,7 @@ public class InformationActivity extends SubstratumActivity {
 
         switch (id) {
             case R.id.clean:
-                AlertDialog.Builder builder1 = new AlertDialog.Builder(InformationActivity.this);
+                AlertDialog.Builder builder1 = new AlertDialog.Builder(OmniActivity.this);
                 builder1.setTitle(theme_name);
                 builder1.setIcon(References.grabAppIcon(getApplicationContext(), theme_pid));
                 builder1.setMessage(R.string.clean_dialog_body)
@@ -398,7 +371,7 @@ public class InformationActivity extends SubstratumActivity {
                 builder1.show();
                 return true;
             case R.id.clean_cache:
-                AlertDialog.Builder builder2 = new AlertDialog.Builder(InformationActivity.this);
+                AlertDialog.Builder builder2 = new AlertDialog.Builder(OmniActivity.this);
                 builder2.setTitle(theme_name);
                 builder2.setIcon(References.grabAppIcon(getApplicationContext(), theme_pid));
                 builder2.setMessage(R.string.clean_cache_dialog_body)
@@ -421,7 +394,7 @@ public class InformationActivity extends SubstratumActivity {
                 builder2.show();
                 return true;
             case R.id.disable:
-                AlertDialog.Builder builder3 = new AlertDialog.Builder(InformationActivity.this);
+                AlertDialog.Builder builder3 = new AlertDialog.Builder(OmniActivity.this);
                 builder3.setTitle(theme_name);
                 builder3.setIcon(References.grabAppIcon(getApplicationContext(), theme_pid));
                 builder3.setMessage(R.string.disable_dialog_body)
@@ -465,7 +438,7 @@ public class InformationActivity extends SubstratumActivity {
                 builder3.show();
                 return true;
             case R.id.enable:
-                AlertDialog.Builder builder4 = new AlertDialog.Builder(InformationActivity.this);
+                AlertDialog.Builder builder4 = new AlertDialog.Builder(OmniActivity.this);
                 builder4.setTitle(theme_name);
                 builder4.setIcon(References.grabAppIcon(getApplicationContext(), theme_pid));
                 builder4.setMessage(R.string.enable_dialog_body)
@@ -509,7 +482,7 @@ public class InformationActivity extends SubstratumActivity {
                 builder4.show();
                 return true;
             case R.id.uninstall:
-                AlertDialog.Builder builder5 = new AlertDialog.Builder(InformationActivity.this);
+                AlertDialog.Builder builder5 = new AlertDialog.Builder(OmniActivity.this);
                 builder5.setTitle(theme_name);
                 builder5.setIcon(References.grabAppIcon(getApplicationContext(), theme_pid));
                 builder5.setMessage(R.string.uninstall_dialog_text)
@@ -580,7 +553,7 @@ public class InformationActivity extends SubstratumActivity {
         @Override
         protected void onPreExecute() {
             String parseMe = String.format(getString(R.string.adapter_uninstalling), theme_name);
-            mProgressDialog = new ProgressDialog(InformationActivity.this);
+            mProgressDialog = new ProgressDialog(OmniActivity.this);
             mProgressDialog.setMessage(parseMe);
             mProgressDialog.setIndeterminate(true);
             mProgressDialog.setCancelable(false);

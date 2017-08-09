@@ -46,7 +46,7 @@ import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
-import projekt.substratum.InformationActivity;
+import projekt.substratum.OmniActivity;
 import projekt.substratum.adapters.tabs.overlays.OverlaysAdapter;
 import projekt.substratum.adapters.tabs.overlays.OverlaysItem;
 import projekt.substratum.common.References;
@@ -989,7 +989,7 @@ class OverlayFunctions {
             fragment.mProgressDialog.dismiss();
 
             // Add dummy intent to be able to close the notification on click
-            Intent notificationIntent = new Intent(context, InformationActivity.class);
+            Intent notificationIntent = new Intent(context, OmniActivity.class);
             notificationIntent.putExtra("theme_name", fragment.theme_name);
             notificationIntent.putExtra("theme_pid", fragment.theme_pid);
             notificationIntent.setFlags(

@@ -89,7 +89,7 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import projekt.substratum.InformationActivity;
+import projekt.substratum.OmniActivity;
 import projekt.substratum.Substratum;
 import projekt.substratum.adapters.tabs.overlays.OverlaysAdapter;
 import projekt.substratum.adapters.tabs.overlays.OverlaysItem;
@@ -433,14 +433,14 @@ public class Overlays extends Fragment {
         localBroadcastManager = LocalBroadcastManager.getInstance(getContext());
         localBroadcastManager.registerReceiver(refreshReceiver, filter);
 
-        theme_name = InformationActivity.getThemeName();
-        theme_pid = InformationActivity.getThemePID();
+        theme_name = OmniActivity.getThemeName();
+        theme_pid = OmniActivity.getThemePID();
         String encrypt_check =
                 References.getOverlayMetadata(getContext(), theme_pid, metadataEncryption);
 
         if (encrypt_check != null && encrypt_check.equals(metadataEncryptionValue)) {
-            byte[] encryption_key = InformationActivity.getEncryptionKey();
-            byte[] iv_encrypt_key = InformationActivity.getIVEncryptKey();
+            byte[] encryption_key = OmniActivity.getEncryptionKey();
+            byte[] iv_encrypt_key = OmniActivity.getIVEncryptKey();
             try {
                 cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
                 cipher.init(
