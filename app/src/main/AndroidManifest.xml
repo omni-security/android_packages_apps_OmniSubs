@@ -24,6 +24,9 @@
           android:versionCode="815"
           android:versionName="eight hundred fifteen" >
 
+    <uses-sdk android:minSdkVersion='25'
+              android:targetSdkVersion='25' />
+
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_SUPERUSER"/>
     <uses-permission android:name="android.permission.CHANGE_CONFIGURATION"/>
