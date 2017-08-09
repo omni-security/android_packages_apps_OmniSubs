@@ -90,6 +90,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import projekt.substratum.InformationActivity;
+import projekt.substratum.Substratum;
 import projekt.substratum.adapters.tabs.overlays.OverlaysAdapter;
 import projekt.substratum.adapters.tabs.overlays.OverlaysItem;
 import projekt.substratum.adapters.tabs.overlays.VariantAdapter;
@@ -118,7 +119,6 @@ public class Overlays extends Fragment {
     public static final String overlaysDir = "overlays";
     public static final String TAG = SUBSTRATUM_BUILDER;
     public static final int THREAD_WAIT_DURATION = 500;
-    public static final int VERSION_CODE = 815;
     public ProgressDialog mProgressDialog;
     public SubstratumBuilder sb;
     public List<OverlaysItem> overlaysLists, checkedOverlays;
@@ -1051,7 +1051,7 @@ public class Overlays extends Fragment {
                     contextRef.get().getString(R.string.logcat_attachment_body),
                     device,
                     rom_version,
-                    String.valueOf(VERSION_CODE),
+                    String.valueOf(Substratum.VERSION_CODE),
                     theme_version,
                     failedPackages,
                     errorLog);

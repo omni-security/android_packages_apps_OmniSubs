@@ -20,6 +20,7 @@ package projekt.substratum.common.commands;
 
 import android.content.Context;
 
+import projekt.substratum.Substratum;
 import projekt.substratum.common.References;
 
 import static projekt.substratum.common.References.ENABLE_AOPT_OUTPUT;
@@ -36,8 +37,6 @@ import static projekt.substratum.common.References.metadataOverlayType3;
 import static projekt.substratum.common.References.metadataOverlayVersion;
 
 public class CompilerCommands {
-
-    public static final int VERSION_CODE = 815;
 
     public static String createOverlayManifest(Context context,
                                                String overlay_package,
@@ -119,7 +118,7 @@ public class CompilerCommands {
 
                 // Track the Substratum version number
                 "        <meta-data android:name=\"" + metadataOverlayVersion + "\" " +
-                "android:value=\"" + VERSION_CODE + "\"/>\n" +
+                "android:value=\"" + Substratum.VERSION_CODE + "\"/>\n" +
 
                 "    </application>\n" +
                 "</manifest>\n";
